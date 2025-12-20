@@ -1,0 +1,5 @@
+Django>=6.0
+djangorestframework>=3.16.0
+django-cors-headers>=4.9.0
+Faker>=24.0.0
+
