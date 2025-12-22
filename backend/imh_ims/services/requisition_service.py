@@ -61,8 +61,8 @@ class RequisitionService:
     @transaction.atomic
     def pick_requisition(requisition: Requisition, user) -> Requisition:
         """Pick items for a requisition (updates stock)"""
-        if requisition.status != 'PENDING':
-            raise ValueError(f"Cannot pick requisition with status {requisition.status}")
+        if requisition.status != 'APPROVED':
+            raise ValueError(f"Cannot pick requisition with status {requisition.status}. Requisition must be APPROVED.")
 
         # Check availability
         availability = RequisitionService.check_availability(requisition)

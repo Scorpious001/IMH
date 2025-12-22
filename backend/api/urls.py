@@ -4,11 +4,13 @@ from api.views import (
     ItemViewSet, LocationViewSet, StockViewSet,
     StockTransferView, StockIssueView, StockAdjustView,
     RequisitionViewSet, RequisitionPickView, RequisitionCompleteView,
+    RequisitionApproveView, RequisitionDenyView,
     ReceiveView, ReceivingHistoryView,
     CountSessionViewSet, CountLineView, CountCompleteView, CountApproveView,
-    AlertsView, SuggestedOrdersView, UsageTrendsView,
-    CategoriesViewSet, VendorsViewSet, ParLevelsView,
-    LoginView, LogoutView, UserInfoView, CSRFTokenView
+    AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView,
+    CategoriesViewSet, VendorsViewSet, ParLevelsView, CategoryParLevelsView, BulkApplyCategoryParLevelsView,
+    LoginView, LogoutView, UserInfoView, CSRFTokenView,
+    UserViewSet, PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView
 )
 
 router = DefaultRouter()
@@ -19,8 +21,16 @@ router.register(r'requisitions', RequisitionViewSet, basename='requisition')
 router.register(r'counts/sessions', CountSessionViewSet, basename='countsession')
 router.register(r'settings/categories', CategoriesViewSet, basename='category')
 router.register(r'settings/vendors', VendorsViewSet, basename='vendor')
+router.register(r'settings/users', UserViewSet, basename='user')
+router.register(r'purchase-requests', PurchaseRequestViewSet, basename='purchaserequest')
 
 urlpatterns = [
+    # Stock operations - must come before router to avoid conflicts
+    path('stock/transfer/', StockTransferView.as_view(), name='stock-transfer'),
+    path('stock/issue/', StockIssueView.as_view(), name='stock-issue'),
+    path('stock/adjust/', StockAdjustView.as_view(), name='stock-adjust'),
+    
+    # Router URLs (includes stock ViewSet)
     path('', include(router.urls)),
     
     # Authentication
@@ -29,14 +39,11 @@ urlpatterns = [
     path('auth/user/', UserInfoView.as_view(), name='auth-user'),
     path('auth/csrf/', CSRFTokenView.as_view(), name='auth-csrf'),
     
-    # Stock operations
-    path('stock/transfer/', StockTransferView.as_view(), name='stock-transfer'),
-    path('stock/issue/', StockIssueView.as_view(), name='stock-issue'),
-    path('stock/adjust/', StockAdjustView.as_view(), name='stock-adjust'),
-    
     # Requisitions
     path('requisitions/<int:requisition_id>/pick/', RequisitionPickView.as_view(), name='requisition-pick'),
     path('requisitions/<int:requisition_id>/complete/', RequisitionCompleteView.as_view(), name='requisition-complete'),
+    path('requisitions/<int:requisition_id>/approve/', RequisitionApproveView.as_view(), name='requisition-approve'),
+    path('requisitions/<int:requisition_id>/deny/', RequisitionDenyView.as_view(), name='requisition-deny'),
     
     # Receiving
     path('receiving/receive/', ReceiveView.as_view(), name='receive'),
@@ -51,8 +58,16 @@ urlpatterns = [
     path('reports/alerts/', AlertsView.as_view(), name='alerts'),
     path('reports/suggested-orders/', SuggestedOrdersView.as_view(), name='suggested-orders'),
     path('reports/usage-trends/', UsageTrendsView.as_view(), name='usage-trends'),
+    path('reports/general-usage/', GeneralUsageView.as_view(), name='general-usage'),
+    path('reports/low-par-trends/', LowParTrendsView.as_view(), name='low-par-trends'),
     
     # Settings
     path('settings/par-levels/', ParLevelsView.as_view(), name='par-levels'),
+    path('settings/categories/<int:category_id>/par-levels/', CategoryParLevelsView.as_view(), name='category-par-levels'),
+    path('settings/categories/<int:category_id>/par-levels/bulk-apply/', BulkApplyCategoryParLevelsView.as_view(), name='bulk-apply-category-par-levels'),
+    
+    # Purchase Requests
+    path('purchase-requests/<int:purchase_request_id>/approve/', PurchaseRequestApproveView.as_view(), name='purchase-request-approve'),
+    path('purchase-requests/<int:purchase_request_id>/deny/', PurchaseRequestDenyView.as_view(), name='purchase-request-deny'),
 ]
 

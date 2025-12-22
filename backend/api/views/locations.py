@@ -51,7 +51,14 @@ class LocationViewSet(viewsets.ModelViewSet):
                 'id': location.id,
                 'name': location.name,
                 'type': location.type,
-                'children': [build_tree(child) for child in children]
+                'property_id': location.property_id or '',
+                'parent_location': location.parent_location_id,
+                'floorplan_id': location.floorplan_id or '',
+                'coordinates': location.coordinates or '',
+                'is_active': location.is_active,
+                'child_locations': [build_tree(child) for child in children],
+                'created_at': location.created_at.isoformat() if location.created_at else '',
+                'updated_at': location.updated_at.isoformat() if location.updated_at else ''
             }
         
         tree = [build_tree(loc) for loc in root_locations]

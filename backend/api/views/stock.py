@@ -2,16 +2,19 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from decimal import Decimal
 from imh_ims.models import StockLevel, Item, Location
 from api.serializers import StockLevelSerializer, InventoryTransactionSerializer
 from imh_ims.services.stock_service import StockService
+from api.permissions import create_permission_class
 
 
 class StockViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for viewing stock levels"""
     queryset = StockLevel.objects.all()
     serializer_class = StockLevelSerializer
+    permission_classes = [IsAuthenticated, create_permission_class('stock', 'view')]
 
     def get_queryset(self):
         queryset = StockLevel.objects.all()
@@ -57,6 +60,8 @@ class StockViewSet(viewsets.ReadOnlyModelViewSet):
 
 class StockTransferView(APIView):
     """Transfer stock between locations"""
+    permission_classes = [IsAuthenticated, create_permission_class('stock', 'edit')]
+    
     def post(self, request):
         item_id = request.data.get('item_id')
         from_location_id = request.data.get('from_location_id')
@@ -94,6 +99,8 @@ class StockTransferView(APIView):
 
 class StockIssueView(APIView):
     """Issue stock from a location"""
+    permission_classes = [IsAuthenticated, create_permission_class('stock', 'edit')]
+    
     def post(self, request):
         item_id = request.data.get('item_id')
         from_location_id = request.data.get('from_location_id')
@@ -130,6 +137,8 @@ class StockIssueView(APIView):
 
 class StockAdjustView(APIView):
     """Manually adjust stock level"""
+    permission_classes = [IsAuthenticated, create_permission_class('stock', 'edit')]
+    
     def post(self, request):
         item_id = request.data.get('item_id')
         location_id = request.data.get('location_id')

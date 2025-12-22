@@ -31,10 +31,10 @@ class OrderSuggestionService:
         try:
             stock = StockLevel.objects.get(item=item, location=location)
             current_qty = stock.on_hand_qty
-            par_min = stock.par_min
+            par = stock.par
         except StockLevel.DoesNotExist:
             current_qty = Decimal('0')
-            par_min = Decimal('0')
+            par = Decimal('0')
 
         projected_qty = current_qty - (avg_daily_usage * Decimal(str(days_ahead)))
         
@@ -42,8 +42,8 @@ class OrderSuggestionService:
             'current_qty': current_qty,
             'projected_qty': projected_qty,
             'avg_daily_usage': avg_daily_usage,
-            'days_until_below_par': None if par_min == 0 else int((current_qty - par_min) / avg_daily_usage) if avg_daily_usage > 0 else None,
-            'will_go_below_par': projected_qty < par_min if par_min > 0 else False
+            'days_until_below_par': None if par == 0 else int((current_qty - par) / avg_daily_usage) if avg_daily_usage > 0 else None,
+            'will_go_below_par': projected_qty < par if par > 0 else False
         }
 
     @staticmethod
@@ -60,7 +60,7 @@ class OrderSuggestionService:
             stock_levels = StockLevel.objects.filter(item=item)
             
             for stock in stock_levels:
-                if stock.par_min == 0:
+                if stock.par == 0:
                     continue  # Skip items without par levels
                 
                 avg_daily_usage = OrderSuggestionService.calculate_avg_daily_usage(item)
@@ -73,22 +73,21 @@ class OrderSuggestionService:
                 projected_on_hand = stock.on_hand_qty - projected_usage
                 
                 # If projected to go below par, suggest order
-                if projected_on_hand < stock.par_min:
-                    # Order enough to bring back to par_max
-                    order_qty = stock.par_max - projected_on_hand
+                if projected_on_hand < stock.par:
+                    # Order enough to bring back to par level
+                    order_qty = stock.par - projected_on_hand
                     
                     if order_qty > 0:
                         suggestions.append({
                             'item': item,
                             'location': stock.location,
                             'current_on_hand': stock.on_hand_qty,
-                            'par_min': stock.par_min,
-                            'par_max': stock.par_max,
+                            'par': stock.par,
                             'avg_daily_usage': avg_daily_usage,
                             'lead_time_days': lead_time_days,
                             'projected_on_hand': projected_on_hand,
                             'suggested_order_qty': order_qty,
-                            'days_until_below_par': int((stock.on_hand_qty - stock.par_min) / avg_daily_usage) if avg_daily_usage > 0 else None
+                            'days_until_below_par': int((stock.on_hand_qty - stock.par) / avg_daily_usage) if avg_daily_usage > 0 else None
                         })
 
         return suggestions

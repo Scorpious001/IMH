@@ -7,6 +7,8 @@ from .transaction import InventoryTransaction
 from .requisition import Requisition, RequisitionLine
 from .count import CountSession, CountLine
 from .purchase import PurchaseRequest, PurchaseRequestLine
+from .user_profile import UserProfile
+from .permission import ModulePermission, UserPermission
 
 __all__ = [
     'Category',
@@ -21,5 +23,8 @@ __all__ = [
     'CountLine',
     'PurchaseRequest',
     'PurchaseRequestLine',
+    'UserProfile',
+    'ModulePermission',
+    'UserPermission',
 ]
 

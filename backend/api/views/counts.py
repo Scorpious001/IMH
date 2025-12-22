@@ -2,16 +2,31 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from decimal import Decimal
 from imh_ims.models import CountSession, CountLine, Location, Item
 from api.serializers import CountSessionSerializer, CountLineSerializer
 from imh_ims.services.count_service import CountService
+from api.permissions import create_permission_class
 
 
 class CountSessionViewSet(viewsets.ModelViewSet):
     """ViewSet for Count Session operations"""
     queryset = CountSession.objects.all()
     serializer_class = CountSessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """Apply permission checks based on action"""
+        if self.action in ['list', 'retrieve']:
+            self.permission_classes = [IsAuthenticated, create_permission_class('counts', 'view')]
+        elif self.action == 'create':
+            self.permission_classes = [IsAuthenticated, create_permission_class('counts', 'create')]
+        elif self.action in ['update', 'partial_update']:
+            self.permission_classes = [IsAuthenticated, create_permission_class('counts', 'edit')]
+        elif self.action == 'destroy':
+            self.permission_classes = [IsAuthenticated, create_permission_class('counts', 'delete')]
+        return super().get_permissions()
 
     def get_queryset(self):
         queryset = CountSession.objects.all()
@@ -49,6 +64,7 @@ class CountSessionViewSet(viewsets.ModelViewSet):
 
 
 class CountLineView(APIView):
+    permission_classes = [IsAuthenticated, create_permission_class('counts', 'edit')]
     """Add or update a count line"""
     def post(self, request, session_id):
         item_id = request.data.get('item_id')
@@ -83,6 +99,7 @@ class CountLineView(APIView):
 
 
 class CountCompleteView(APIView):
+    permission_classes = [IsAuthenticated, create_permission_class('counts', 'edit')]
     """Complete a count session"""
     def post(self, request, session_id):
         try:
@@ -105,6 +122,7 @@ class CountCompleteView(APIView):
 
 
 class CountApproveView(APIView):
+    permission_classes = [IsAuthenticated]  # Approval is role-based, not permission-based
     """Approve a count session and apply variances"""
     def post(self, request, session_id):
         try:

@@ -1,14 +1,18 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from decimal import Decimal
 from imh_ims.models import Item, Location, Vendor, InventoryTransaction
 from api.serializers import InventoryTransactionSerializer
 from imh_ims.services.stock_service import StockService
+from api.permissions import create_permission_class
 
 
 class ReceiveView(APIView):
     """Receive items into inventory"""
+    permission_classes = [IsAuthenticated, create_permission_class('receiving', 'create')]
+    
     def post(self, request):
         item_id = request.data.get('item_id')
         to_location_id = request.data.get('to_location_id')
@@ -50,6 +54,8 @@ class ReceiveView(APIView):
 
 class ReceivingHistoryView(APIView):
     """Get receiving history"""
+    permission_classes = [IsAuthenticated, create_permission_class('receiving', 'view')]
+    
     def get(self, request):
         from imh_ims.models import InventoryTransaction
         

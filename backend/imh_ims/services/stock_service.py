@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Tuple
 from django.db import transaction, models
 from django.utils import timezone
 from imh_ims.models import StockLevel, InventoryTransaction, Item, Location
@@ -13,6 +14,43 @@ class StockService:
         return sum(
             stock.on_hand_qty for stock in StockLevel.objects.filter(item=item)
         )
+
+    @staticmethod
+    def get_property_on_hand(item: Item, property_id: str = None) -> Tuple[Decimal, str]:
+        """
+        Calculate total on-hand quantity for a specific property.
+        Returns tuple of (on_hand_qty, property_id).
+        If property_id is None, determines primary property (property with most stock).
+        """
+        stock_levels = StockLevel.objects.filter(item=item).select_related('location')
+        
+        if not stock_levels.exists():
+            return Decimal(0), property_id or ''
+        
+        # Group stock by property_id
+        property_stock = {}
+        for stock in stock_levels:
+            prop_id = stock.location.property_id or ''
+            if prop_id not in property_stock:
+                property_stock[prop_id] = Decimal(0)
+            property_stock[prop_id] += stock.on_hand_qty
+        
+        # If property_id is provided, use it
+        if property_id is not None:
+            return property_stock.get(property_id, Decimal(0)), property_id
+        
+        # Determine primary property (property with most stock)
+        if not property_stock:
+            return Decimal(0), ''
+        
+        # If all locations share the same property_id, use that
+        if len(property_stock) == 1:
+            prop_id = list(property_stock.keys())[0]
+            return property_stock[prop_id], prop_id
+        
+        # Find property with most stock
+        primary_property = max(property_stock.items(), key=lambda x: x[1])
+        return primary_property[1], primary_property[0]
 
     @staticmethod
     def check_par_levels(item: Item = None, location: Location = None):

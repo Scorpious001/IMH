@@ -1,0 +1,7 @@
+name,short_code,category,default_vendor,photo_url,unit_of_measure,cost,lead_time_days,is_active,location_name,location_type,location_property_id,parent_location_name,on_hand_qty,par
+Sample Item 1,ITEM-001,Electronics,Acme Corp,https://example.com/item1.jpg,ea,25.50,7,true,Main Storeroom,STOREROOM,PROP-001,,50,20
+Sample Item 2,ITEM-002,Electronics,Acme Corp,,case,150.00,5,true,Main Storeroom,STOREROOM,PROP-001,,10,5
+Sample Item 3,ITEM-003,Office Supplies,Office Depot,,ea,5.99,3,true,Supply Closet,CLOSET,PROP-001,,100,50
+Sample Item 4,ITEM-004,Cleaning Supplies,Clean Co,,roll,12.00,4,true,Janitorial Room,ROOM,PROP-001,,25,10
+Sample Item 5,ITEM-005,Electronics,Acme Corp,,ea,75.00,10,true,Main Storeroom,STOREROOM,PROP-001,,15,5
+

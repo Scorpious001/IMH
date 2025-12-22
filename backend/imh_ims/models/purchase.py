@@ -28,6 +28,24 @@ class PurchaseRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
+    # Approval fields
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_purchase_requests'
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    denied_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='denied_purchase_requests'
+    )
+    denied_at = models.DateTimeField(null=True, blank=True)
+    denial_reason = models.TextField(blank=True)
 
     class Meta:
         ordering = ['-created_at']

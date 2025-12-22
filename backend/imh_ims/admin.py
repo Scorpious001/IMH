@@ -36,7 +36,7 @@ class ItemAdmin(admin.ModelAdmin):
 
 @admin.register(StockLevel)
 class StockLevelAdmin(admin.ModelAdmin):
-    list_display = ['item', 'location', 'on_hand_qty', 'par_min', 'par_max', 'is_below_par']
+    list_display = ['item', 'location', 'on_hand_qty', 'par', 'is_below_par']
     list_filter = ['location', 'item__category']
     search_fields = ['item__name', 'location__name']
 

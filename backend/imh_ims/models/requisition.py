@@ -7,6 +7,8 @@ class Requisition(models.Model):
     """Internal requisition request"""
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('DENIED', 'Denied'),
         ('PICKED', 'Picked'),
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
@@ -32,6 +34,24 @@ class Requisition(models.Model):
     needed_by = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
+    # Approval fields
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_requisitions'
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    denied_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='denied_requisitions'
+    )
+    denied_at = models.DateTimeField(null=True, blank=True)
+    denial_reason = models.TextField(blank=True)
 
     class Meta:
         ordering = ['-created_at']

@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
+from imh_ims.models import UserProfile
 
 
 class LoginView(APIView):
@@ -23,7 +24,31 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            if not user.is_active:
+                return Response(
+                    {'error': 'User account is disabled. Please contact an administrator.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
             login(request, user)
+            # Get user role
+            try:
+                profile = user.profile
+                role = profile.role
+            except UserProfile.DoesNotExist:
+                # Create default profile if it doesn't exist
+                profile = UserProfile.objects.create(user=user, role='SUPERVISOR')
+                role = profile.role
+            
+            # Get user permissions
+            permissions = []
+            try:
+                from imh_ims.services.permission_service import get_user_permission_list
+                permissions = get_user_permission_list(user)
+            except Exception:
+                # If permissions table doesn't exist yet, return empty list
+                pass
+            
             return Response({
                 'message': 'Login successful',
                 'user': {
@@ -31,7 +56,11 @@ class LoginView(APIView):
                     'username': user.username,
                     'email': user.email,
                     'is_staff': user.is_staff,
-                    'is_superuser': user.is_superuser
+                    'is_superuser': user.is_superuser,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'role': role,
+                    'permissions': permissions
                 }
             })
         else:
@@ -56,6 +85,24 @@ class UserInfoView(APIView):
     
     def get(self, request):
         user = request.user
+        # Get user role
+        try:
+            profile = user.profile
+            role = profile.role
+        except UserProfile.DoesNotExist:
+            # Create default profile if it doesn't exist
+            profile = UserProfile.objects.create(user=user, role='SUPERVISOR')
+            role = profile.role
+        
+        # Get user permissions
+        permissions = []
+        try:
+            from imh_ims.services.permission_service import get_user_permission_list
+            permissions = get_user_permission_list(user)
+        except Exception:
+            # If permissions table doesn't exist yet, return empty list
+            pass
+        
         return Response({
             'id': user.id,
             'username': user.username,
@@ -63,7 +110,9 @@ class UserInfoView(APIView):
             'is_staff': user.is_staff,
             'is_superuser': user.is_superuser,
             'first_name': user.first_name,
-            'last_name': user.last_name
+            'last_name': user.last_name,
+            'role': role,
+            'permissions': permissions
         })
 
 

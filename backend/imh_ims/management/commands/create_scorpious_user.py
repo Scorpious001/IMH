@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+from imh_ims.models import UserProfile
 
 
 class Command(BaseCommand):
@@ -15,7 +16,8 @@ class Command(BaseCommand):
             defaults={
                 'email': email,
                 'is_staff': True,
-                'is_superuser': True
+                'is_superuser': True,
+                'is_active': True
             }
         )
         
@@ -23,8 +25,14 @@ class Command(BaseCommand):
         user.set_password(password)
         user.is_staff = True
         user.is_superuser = True
+        user.is_active = True  # Ensure user is active
         user.email = email
         user.save()
+        
+        # Get or create UserProfile and assign ADMIN role
+        profile, profile_created = UserProfile.objects.get_or_create(user=user)
+        profile.role = 'ADMIN'
+        profile.save()
         
         if created:
             self.stdout.write(
@@ -33,5 +41,14 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.SUCCESS(f'Successfully updated master user "{username}" with new password')
+            )
+        
+        if profile_created:
+            self.stdout.write(
+                self.style.SUCCESS(f'Created UserProfile and assigned ADMIN role to "{username}"')
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(f'Updated UserProfile: assigned ADMIN role to "{username}"')
             )
 

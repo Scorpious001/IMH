@@ -136,7 +136,15 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }
+
+# Add no-cache headers to prevent browser caching of API responses
+# Insert after CommonMiddleware
+common_middleware_idx = MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
+MIDDLEWARE.insert(common_middleware_idx + 1, 'api.middleware.NoCacheMiddleware')
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [

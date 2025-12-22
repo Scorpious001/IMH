@@ -27,19 +27,12 @@ class StockLevel(models.Model):
         default=0,
         validators=[MinValueValidator(0)]
     )
-    par_min = models.DecimalField(
+    par = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0,
         validators=[MinValueValidator(0)],
-        help_text="Minimum par level"
-    )
-    par_max = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0,
-        validators=[MinValueValidator(0)],
-        help_text="Maximum par level"
+        help_text="Par level - stock should be maintained above this level"
     )
     last_counted_at = models.DateTimeField(null=True, blank=True)
     last_counted_by = models.ForeignKey(
@@ -66,13 +59,13 @@ class StockLevel(models.Model):
 
     @property
     def is_below_par(self):
-        """Check if stock is below minimum par level"""
-        return self.on_hand_qty < self.par_min
+        """Check if stock is below par level"""
+        return self.on_hand_qty < self.par
 
     @property
     def is_at_risk(self):
-        """Check if stock is near reorder trigger (between min and min*1.2)"""
-        if self.par_min == 0:
+        """Check if stock is near reorder trigger (between par and par*1.2)"""
+        if self.par == 0:
             return False
-        return self.par_min <= self.on_hand_qty < (self.par_min * 1.2)
+        return self.par <= self.on_hand_qty < (self.par * 1.2)
 
