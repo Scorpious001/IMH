@@ -1,0 +1,216 @@
+.item-detail-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.item-detail-header {
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary, #f3f4f6);
+  color: var(--text-primary, #374151);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.back-button:hover {
+  background: var(--bg-tertiary, #e5e7eb);
+}
+
+.item-header-info h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--text-primary, #111827);
+}
+
+.item-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.item-code {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  font-family: monospace;
+}
+
+.item-detail-sections {
+  width: 100%;
+}
+
+.section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.section-tabs .tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-bottom: -2px;
+}
+
+.section-tabs .tab:hover {
+  color: var(--text-primary, #374151);
+  background: var(--bg-tertiary, transparent);
+}
+
+.section-tabs .tab.active {
+  color: var(--primary-color, #3b82f6);
+  border-bottom-color: var(--primary-color, #3b82f6);
+  font-weight: 600;
+}
+
+.section-content {
+  width: 100%;
+}
+
+.detail-section {
+  width: 100%;
+}
+
+.detail-section h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #111827);
+}
+
+.item-photo-section {
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+
+.item-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .item-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: var(--bg-secondary, #f9fafb);
+  color: var(--text-primary, #212529);
+  border-radius: 0.5rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-help-text {
+  font-size: 0.65rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  font-style: italic;
+  color: var(--text-secondary, #9ca3af);
+  margin-left: 0.25rem;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: var(--text-primary, #111827);
+  font-weight: 500;
+}
+
+.stock-summary {
+  background: var(--bg-secondary, #f0f9ff);
+  color: var(--text-primary, #212529);
+  border: 1px solid var(--border-color, #bae6fd);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark-mode .stock-summary {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.stock-summary p {
+  margin: 0.5rem 0;
+  color: var(--text-primary, #0c4a6e);
+  transition: color 0.3s ease;
+}
+
+.dark-mode .stock-summary p {
+  color: var(--text-primary);
+}
+
+.edit-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--border-color, #e5e7eb);
+}
+
+.page-loading,
+.page-error {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.page-error {
+  color: #dc2626; /* Keep error color as red for visibility */
+}
+
+.page-error .back-button {
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .item-detail-page {
+    padding: 0.5rem;
+  }
+
+  .item-header-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .section-tabs {
+    gap: 0.25rem;
+  }
+
+  .section-tabs .tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+

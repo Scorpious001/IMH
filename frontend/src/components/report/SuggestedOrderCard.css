@@ -1,0 +1,91 @@
+.suggested-order-card {
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.suggested-order-card:hover {
+  box-shadow: 0 2px 8px var(--shadow, rgba(0, 0, 0, 0.1));
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.suggestion-item-info {
+  flex: 1;
+}
+
+.suggestion-item-name {
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--text-primary, #333);
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.suggestion-item-code {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.suggestion-qty {
+  text-align: right;
+}
+
+.qty-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.qty-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color, #007bff);
+  transition: color 0.3s ease;
+}
+
+.suggestion-details {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+}
+
+.detail-row {
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.detail-row strong {
+  color: var(--text-primary, #333);
+  margin-right: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .suggestion-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .suggestion-qty {
+    text-align: left;
+  }
+}
+

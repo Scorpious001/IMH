@@ -1,0 +1,21 @@
+.par-levels-tab {
+  padding: 1rem;
+}
+
+.tab-header {
+  margin-bottom: 1.5rem;
+}
+
+.tab-header h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.tab-description {
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+

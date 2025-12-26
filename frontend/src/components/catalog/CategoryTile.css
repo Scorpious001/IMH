@@ -1,0 +1,105 @@
+.category-tile {
+  background: var(--bg-secondary, white);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  color: var(--text-primary, #212529);
+}
+
+.category-tile:hover {
+  box-shadow: 0 2px 8px var(--shadow, rgba(0, 0, 0, 0.1));
+  border-color: var(--primary-color, #007bff);
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.category-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #f0f0f0);
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.category-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, #212529);
+  flex: 1;
+  transition: color 0.3s ease;
+}
+
+.category-stats {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  transition: border-color 0.3s ease;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-primary, #212529) !important;
+  transition: color 0.3s ease;
+}
+
+.stat-value.low-count-warning {
+  color: #dc3545 !important; /* Keep warning color consistent regardless of theme */
+}
+
+/* Dark mode specific overrides for stat values */
+.dark-mode .stat-value {
+  color: var(--text-primary, #ffffff) !important;
+}
+
+.dark-mode .stat-value.low-count-warning {
+  color: #dc3545 !important;
+}
+
+/* Ensure stat values respect appearance settings */
+.category-tile .stat-value {
+  color: var(--text-primary, #212529) !important;
+}
+
+.dark-mode .category-tile .stat-value {
+  color: var(--text-primary, #ffffff) !important;
+}
+
+@media (max-width: 768px) {
+  .category-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+

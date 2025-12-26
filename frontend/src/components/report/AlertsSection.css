@@ -1,0 +1,109 @@
+.alerts-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.alert-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color, #ddd);
+  background: var(--bg-primary, white);
+  color: var(--text-primary, #212529);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  background: var(--bg-tertiary, #f5f5f5);
+}
+
+.tab-button.active {
+  background: var(--primary-color, #007bff);
+  color: var(--primary-text, white);
+  border-color: var(--primary-color, #007bff);
+}
+
+.alerts-content {
+  background: var(--bg-secondary, #f9f9f9);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.empty-alerts {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.alerts-loading,
+.alerts-error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.alerts-error p {
+  margin-bottom: 1rem;
+}
+
+.btn-retry {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-retry:hover {
+  background-color: #0056b3;
+}
+
+.alerts-error {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alert-tabs {
+    width: 100%;
+  }
+
+  .tab-button {
+    flex: 1;
+  }
+}
+

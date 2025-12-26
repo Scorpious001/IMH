@@ -1,0 +1,92 @@
+.stock-levels-list {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.stock-levels-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.stock-levels-table thead {
+  background: var(--bg-secondary, #f3f4f6);
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.stock-levels-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary, #374151);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.stock-levels-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  color: var(--text-primary, #212529);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.stock-level-row:hover {
+  background: var(--bg-secondary, #f9fafb);
+}
+
+.stock-level-critical {
+  background: var(--bg-secondary, #fef2f2);
+}
+
+.dark-mode .stock-level-critical {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.stock-level-warning {
+  background: var(--bg-secondary, #fffbeb);
+}
+
+.dark-mode .stock-level-warning {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.stock-levels-loading,
+.stock-levels-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+.stock-level-row.editing {
+  background: var(--bg-secondary, #f9fafb);
+}
+
+.btn-edit {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--primary-color, #007bff);
+  border-radius: 4px;
+  background: var(--bg-primary, white);
+  color: var(--primary-color, #007bff);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit:hover {
+  background: var(--primary-color, #007bff);
+  color: var(--primary-text, white);
+}
+
+@media (max-width: 768px) {
+  .stock-levels-table {
+    font-size: 0.75rem;
+  }
+
+  .stock-levels-table th,
+  .stock-levels-table td {
+    padding: 0.5rem;
+  }
+}
+

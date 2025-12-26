@@ -1,0 +1,121 @@
+.item-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--bg-primary, white);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.item-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.item-table thead {
+  background: var(--bg-secondary, #f9f9f9);
+}
+
+.item-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary, #333);
+  border-bottom: 2px solid var(--border-color, #ddd);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.item-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.item-table th.sortable:hover {
+  background: var(--bg-tertiary, #f0f0f0);
+}
+
+.sort-icon {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.item-table tbody tr {
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  transition: background-color 0.2s ease;
+}
+
+.item-table tbody tr:hover {
+  background: var(--bg-secondary, #f9f9f9);
+}
+
+.item-table td {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.item-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.item-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.view-button {
+  padding: 0.25rem 0.75rem;
+  background: var(--primary-color, #007bff);
+  color: var(--primary-text, white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.view-button:hover {
+  background: var(--primary-color-dark, #0056b3);
+}
+
+.table-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #666);
+  background: var(--bg-primary, white);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .item-table-container {
+    font-size: 0.85rem;
+  }
+
+  .item-table th,
+  .item-table td {
+    padding: 0.5rem;
+  }
+
+  .item-thumbnail {
+    width: 30px;
+    height: 30px;
+  }
+
+  .view-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+

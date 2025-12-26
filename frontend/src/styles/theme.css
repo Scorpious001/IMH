@@ -1,0 +1,206 @@
+:root {
+  --primary-color: #007bff;
+  --accent-color: #28a745;
+  --brightness: 100%;
+  --font-size: medium;
+  --display-density: comfortable;
+  
+  /* Light mode colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode {
+  /* Dark mode colors */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3d3d3d;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --border-color: #404040;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Apply theme to body and root */
+html,
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Apply brightness filter - but be careful as it affects everything */
+/* body {
+  filter: brightness(var(--brightness));
+  transition: filter 0.3s ease;
+} */
+
+/* Font size variations */
+body.font-size-small {
+  font-size: 14px;
+}
+
+body.font-size-medium {
+  font-size: 16px;
+}
+
+body.font-size-large {
+  font-size: 18px;
+}
+
+/* Display density */
+body.display-density-compact {
+  --spacing-unit: 0.5rem;
+  --padding-unit: 0.5rem;
+}
+
+body.display-density-comfortable {
+  --spacing-unit: 1rem;
+  --padding-unit: 1rem;
+}
+
+body.display-density-spacious {
+  --spacing-unit: 1.5rem;
+  --padding-unit: 1.5rem;
+}
+
+/* Theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Global dark mode overrides for common elements */
+.dark-mode {
+  /* Override common background colors */
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: var(--text-primary);
+}
+
+/* Override white backgrounds in dark mode */
+.dark-mode .settings-page,
+.dark-mode .catalog-page,
+.dark-mode .users-page,
+.dark-mode .vendors-page,
+.dark-mode .requisitions-page,
+.dark-mode .receiving-page,
+.dark-mode .counts-page,
+.dark-mode .reports-page,
+.dark-mode .stock-by-location-page {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Override card/container backgrounds */
+.dark-mode .settings-content,
+.dark-mode .settings-section,
+.dark-mode .form-modal,
+.dark-mode .modal-content,
+.dark-mode .users-list,
+.dark-mode .users-table,
+.dark-mode .stock-levels-list,
+.dark-mode .stock-levels-table {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Override input and form elements */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode input:focus,
+.dark-mode select:focus,
+.dark-mode textarea:focus {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--primary-color);
+}
+
+/* Override table backgrounds */
+.dark-mode table {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.dark-mode thead {
+  background-color: var(--bg-tertiary);
+}
+
+.dark-mode tbody tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Button styles using theme colors */
+.btn-primary {
+  background-color: var(--primary-color, #007bff);
+  color: var(--primary-text, white);
+  border: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-color-dark, #0056b3);
+}
+
+.dark-mode .btn-primary {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+}
+
+.dark-mode .btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Override text colors */
+.dark-mode .text-secondary,
+.dark-mode .section-description,
+.dark-mode .preference-description {
+  color: var(--text-secondary);
+}
+
+/* Ensure stat values and labels respect theme */
+.stat-label {
+  color: var(--text-secondary) !important;
+}
+
+.stat-value {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .stat-value {
+  color: var(--text-primary) !important;
+}
+
+.stat-value.low-count-warning {
+  color: #dc3545 !important;
+}
+
+.dark-mode .stat-value.low-count-warning {
+  color: #dc3545 !important;
+}
+

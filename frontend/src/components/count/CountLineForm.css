@@ -1,0 +1,203 @@
+.count-line-form {
+  background: var(--bg-secondary, #f9f9f9);
+  color: var(--text-primary, #212529);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.item-selector {
+  position: relative;
+}
+
+.item-selector input {
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--bg-tertiary, white);
+  color: var(--text-primary, #212529);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.item-selector input:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px var(--primary-color-rgba-light, rgba(0, 123, 255, 0.1));
+}
+
+.item-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary, white);
+  color: var(--text-primary, #212529);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  margin-top: 0.25rem;
+  box-shadow: 0 2px 8px var(--shadow, rgba(0, 0, 0, 0.1));
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.item-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  transition: background-color 0.2s ease;
+}
+
+.item-option:hover {
+  background: var(--bg-tertiary, #f5f5f5);
+}
+
+.item-option-photo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.item-option-details {
+  flex: 1;
+}
+
+.item-option-name {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.item-option-code {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  margin-top: 0.25rem;
+}
+
+.expected-qty {
+  padding: 0.5rem;
+  background: var(--bg-tertiary, #e9ecef);
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.variance-display {
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.variance-display.positive {
+  background: var(--bg-secondary, #d4edda);
+  color: #16a34a;
+  border: 1px solid #16a34a;
+}
+
+.dark-mode .variance-display.positive {
+  background: rgba(22, 163, 74, 0.2);
+  border-color: #16a34a;
+}
+
+.variance-display.negative {
+  background: var(--bg-secondary, #f8d7da);
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.dark-mode .variance-display.negative {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #dc2626;
+}
+
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--bg-tertiary, white);
+  color: var(--text-primary, #212529);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px var(--primary-color-rgba-light, rgba(0, 123, 255, 0.1));
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color, #007bff);
+  color: var(--primary-text, white);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-dark, #0056b3);
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary, #6c757d);
+  color: var(--text-primary, #374151);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color, #545b62);
+}
+
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+

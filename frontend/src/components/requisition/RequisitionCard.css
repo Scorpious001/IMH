@@ -1,0 +1,77 @@
+.requisition-card {
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.requisition-card:hover {
+  box-shadow: 0 2px 8px var(--shadow, rgba(0, 0, 0, 0.1));
+}
+
+.requisition-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.requisition-id {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.requisition-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.requisition-route {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.from-location,
+.to-location {
+  font-weight: 500;
+}
+
+.arrow {
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.requisition-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.meta-item {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.meta-item strong {
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .requisition-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+

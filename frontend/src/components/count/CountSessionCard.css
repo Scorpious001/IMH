@@ -1,0 +1,102 @@
+.count-session-card {
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.count-session-card:hover {
+  box-shadow: 0 2px 8px var(--shadow, rgba(0, 0, 0, 0.1));
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.session-id {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.session-location {
+  font-size: 0.95rem;
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.meta-item {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.meta-item strong {
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.session-stats {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  transition: border-color 0.3s ease;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary, #333);
+  transition: color 0.3s ease;
+}
+
+.stat-value.variance {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .session-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .session-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+

@@ -1,0 +1,29 @@
+.tile-view {
+  width: 100%;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.tile-view-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+

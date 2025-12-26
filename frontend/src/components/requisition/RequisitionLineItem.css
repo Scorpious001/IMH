@@ -1,0 +1,95 @@
+.requisition-line-item {
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-secondary, #f9f9f9);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.line-header {
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.line-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.line-item-photo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.line-item-details {
+  flex: 1;
+}
+
+.line-item-name {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.line-item-code {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.line-quantities {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.quantity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.quantity-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.3s ease;
+}
+
+.quantity-value {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.picked-complete {
+  color: #28a745;
+}
+
+.picked-partial {
+  color: #ffc107;
+}
+
+.available-ok {
+  color: #28a745;
+}
+
+.available-low {
+  color: #dc3545;
+}
+
+@media (max-width: 768px) {
+  .line-quantities {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .quantity-item {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+

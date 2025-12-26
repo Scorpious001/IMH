@@ -1,0 +1,54 @@
+.usage-chart {
+  width: 100%;
+}
+
+.usage-chart-controls {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.usage-chart-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary, #374151);
+  transition: color 0.3s ease;
+}
+
+.usage-chart-controls select {
+  padding: 0.5rem;
+  background: var(--bg-tertiary, white);
+  color: var(--text-primary, #212529);
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.usage-chart-controls select:focus {
+  outline: none;
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 3px var(--primary-color-rgba-light, rgba(59, 130, 246, 0.1));
+}
+
+.usage-chart-container {
+  height: 300px;
+  width: 100%;
+}
+
+.usage-chart-loading,
+.usage-chart-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #6b7280);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .usage-chart-container {
+    height: 250px;
+  }
+}
+

@@ -1,0 +1,26 @@
+.mobile-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary, #f9fafb);
+  color: var(--text-primary, #212529);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.layout-content {
+  flex: 1;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  background: var(--bg-primary, #f9fafb);
+  color: var(--text-primary, #212529);
+  /* Top padding will be handled by individual pages to account for their headers */
+}
+
+@media (min-width: 768px) {
+  .layout-content {
+    padding: 2rem;
+  }
+}
+

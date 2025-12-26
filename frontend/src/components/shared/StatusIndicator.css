@@ -1,0 +1,31 @@
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-good .status-dot {
+  background-color: #10b981; /* Green */
+}
+
+.status-warning .status-dot {
+  background-color: #f59e0b; /* Amber */
+}
+
+.status-critical .status-dot {
+  background-color: #ef4444; /* Red */
+}
+
+.status-label {
+  font-size: 0.875rem;
+  color: var(--text-primary, #374151);
+  transition: color 0.3s ease;
+}
+
