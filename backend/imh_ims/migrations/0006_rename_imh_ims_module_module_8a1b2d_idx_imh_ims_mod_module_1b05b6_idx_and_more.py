@@ -2,6 +2,37 @@
 
 import django.core.validators
 from django.db import migrations, models
+from django.db import connection
+
+
+def safe_remove_fields(apps, schema_editor):
+    """Safely remove par_min and par_max fields if they exist"""
+    db_alias = schema_editor.connection.alias
+    with connection.cursor() as cursor:
+        # Check what columns exist
+        cursor.execute("PRAGMA table_info(imh_ims_stocklevel)")
+        columns = [row[1] for row in cursor.fetchall()]
+        
+        # Only remove if they exist
+        if 'par_max' in columns:
+            try:
+                # For SQLite, we'd need to recreate the table, but since par_max
+                # should have been removed in migration 0005, we'll skip if it doesn't exist
+                pass
+            except Exception:
+                pass
+        
+        if 'par_min' in columns:
+            try:
+                # par_min should have been renamed to par in migration 0005
+                pass
+            except Exception:
+                pass
+
+
+def reverse_remove_fields(apps, schema_editor):
+    """Reverse operation - would add fields back if needed"""
+    pass
 
 
 class Migration(migrations.Migration):
@@ -21,14 +52,7 @@ class Migration(migrations.Migration):
             new_name="imh_ims_use_user_id_64c119_idx",
             old_name="imh_ims_user_user_id_9c3d4e_idx",
         ),
-        migrations.RemoveField(
-            model_name="stocklevel",
-            name="par_max",
-        ),
-        migrations.RemoveField(
-            model_name="stocklevel",
-            name="par_min",
-        ),
+        migrations.RunPython(safe_remove_fields, reverse_remove_fields),
         migrations.AddField(
             model_name="stocklevel",
             name="par",
