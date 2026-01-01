@@ -101,8 +101,8 @@ if ($checkRepo -match "NOT_FOUND") {
     }
 }
 
-# Build deployment command with first-time setup check (single line to avoid line ending issues)
-$deployCommand = "cd ~/$REPO_PATH && git pull origin $BRANCH && cd backend && if [ ! -d 'venv' ]; then echo 'Setting up virtual environment for first time...' && python3 -m venv venv 2>/dev/null || python3.11 -m venv venv && source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt && pip install gunicorn psycopg2-binary dj-database-url; else source venv/bin/activate; fi && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && if systemctl is-active --quiet imh-ims 2>/dev/null; then sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l; else echo 'Gunicorn service not set up yet. Skipping restart.' && echo 'Run first-time-server-setup.sh to complete server setup.'; fi && echo 'Backend deployment complete'"
+# Build deployment command with first-time setup check
+$deployCommand = "cd ~/$REPO_PATH && git pull origin $BRANCH && cd backend && if [ ! -d 'venv' ]; then echo 'Setting up virtual environment for first time...' && if ! python3 -m venv --help >/dev/null 2>&1; then echo 'Installing python3-venv...' && sudo apt-get update -qq && sudo apt-get install -y python3-venv >/dev/null 2>&1; fi && python3 -m venv venv && source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt && pip install gunicorn psycopg2-binary dj-database-url; else source venv/bin/activate; fi && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && if systemctl is-active --quiet imh-ims 2>/dev/null; then sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l; else echo 'Gunicorn service not set up yet. Skipping restart.' && echo 'Run first-time-server-setup.sh to complete server setup.'; fi && echo 'Backend deployment complete'"
 
 ssh -i "$SSH_KEY" "$SERVER_HOST" $deployCommand
 
