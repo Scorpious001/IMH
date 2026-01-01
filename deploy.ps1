@@ -73,7 +73,29 @@ Write-Host "Successfully pushed to repository" -ForegroundColor Green
 Write-Host ""
 Write-Host "Deploying to EC2 server..." -ForegroundColor Yellow
 
-$deployCommand = "cd $REPO_PATH && git pull origin $BRANCH && cd backend && source venv/bin/activate && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l && echo Backend deployment complete"
+# Check if repository exists on server, if not, provide instructions
+$checkRepo = ssh -i "$SSH_KEY" "$SERVER_HOST" "test -d ~/$REPO_PATH && echo 'EXISTS' || echo 'NOT_FOUND'" 2>&1
+
+if ($checkRepo -match "NOT_FOUND") {
+    Write-Host ""
+    Write-Host "WARNING: Repository not found on server!" -ForegroundColor Yellow
+    Write-Host "The server needs to be set up first." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Please run this on the server to clone the repository:" -ForegroundColor Cyan
+    Write-Host "  ssh -i `"$SSH_KEY`" $SERVER_HOST" -ForegroundColor White
+    Write-Host "  cd ~" -ForegroundColor White
+    Write-Host "  git clone https://github.com/Scorpious001/IMH.git SPS-IMH" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Or use the automated setup script:" -ForegroundColor Cyan
+    Write-Host "  scp -i `"$SSH_KEY`" first-time-server-setup.sh $SERVER_HOST`:~/" -ForegroundColor White
+    Write-Host "  ssh -i `"$SSH_KEY`" $SERVER_HOST" -ForegroundColor White
+    Write-Host "  ./first-time-server-setup.sh https://github.com/Scorpious001/IMH.git" -ForegroundColor White
+    Write-Host ""
+    Write-Host "See FIRST-DEPLOYMENT-CHECKLIST.md for detailed setup instructions." -ForegroundColor Yellow
+    exit 1
+}
+
+$deployCommand = "cd ~/$REPO_PATH && git pull origin $BRANCH && cd backend && source venv/bin/activate && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l && echo Backend deployment complete"
 
 ssh -i "$SSH_KEY" "$SERVER_HOST" $deployCommand
 
