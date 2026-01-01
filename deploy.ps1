@@ -73,26 +73,32 @@ Write-Host "Successfully pushed to repository" -ForegroundColor Green
 Write-Host ""
 Write-Host "Deploying to EC2 server..." -ForegroundColor Yellow
 
-# Check if repository exists on server, if not, provide instructions
+# Check if repository exists on server, if not, clone it (for public repos)
 $checkRepo = ssh -i "$SSH_KEY" "$SERVER_HOST" "test -d ~/$REPO_PATH && echo 'EXISTS' || echo 'NOT_FOUND'" 2>&1
 
 if ($checkRepo -match "NOT_FOUND") {
     Write-Host ""
-    Write-Host "WARNING: Repository not found on server!" -ForegroundColor Yellow
-    Write-Host "The server needs to be set up first." -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Please run this on the server to clone the repository:" -ForegroundColor Cyan
-    Write-Host "  ssh -i `"$SSH_KEY`" $SERVER_HOST" -ForegroundColor White
-    Write-Host "  cd ~" -ForegroundColor White
-    Write-Host "  git clone https://github.com/Scorpious001/IMH.git SPS-IMH" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Or use the automated setup script:" -ForegroundColor Cyan
-    Write-Host "  scp -i `"$SSH_KEY`" first-time-server-setup.sh $SERVER_HOST`:~/" -ForegroundColor White
-    Write-Host "  ssh -i `"$SSH_KEY`" $SERVER_HOST" -ForegroundColor White
-    Write-Host "  ./first-time-server-setup.sh https://github.com/Scorpious001/IMH.git" -ForegroundColor White
-    Write-Host ""
-    Write-Host "See FIRST-DEPLOYMENT-CHECKLIST.md for detailed setup instructions." -ForegroundColor Yellow
-    exit 1
+    Write-Host "Repository not found on server. Attempting to clone..." -ForegroundColor Yellow
+    $cloneResult = ssh -i "$SSH_KEY" "$SERVER_HOST" "cd ~ && git clone https://github.com/Scorpious001/IMH.git $REPO_PATH 2>&1"
+    
+    if ($LASTEXITCODE -ne 0 -or $cloneResult -match "fatal|error") {
+        Write-Host ""
+        Write-Host "Failed to clone repository automatically." -ForegroundColor Red
+        Write-Host "This usually means:" -ForegroundColor Yellow
+        Write-Host "  1. Repository is private (needs authentication)" -ForegroundColor White
+        Write-Host "  2. Network issues" -ForegroundColor White
+        Write-Host ""
+        Write-Host "If repository is private, you need to:" -ForegroundColor Cyan
+        Write-Host "  - Make it public, OR" -ForegroundColor White
+        Write-Host "  - Clone manually with credentials on the server" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Manual clone command:" -ForegroundColor Cyan
+        Write-Host "  ssh -i `"$SSH_KEY`" $SERVER_HOST" -ForegroundColor White
+        Write-Host "  cd ~ && git clone https://github.com/Scorpious001/IMH.git $REPO_PATH" -ForegroundColor White
+        exit 1
+    } else {
+        Write-Host "Repository cloned successfully!" -ForegroundColor Green
+    }
 }
 
 $deployCommand = "cd ~/$REPO_PATH && git pull origin $BRANCH && cd backend && source venv/bin/activate && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l && echo Backend deployment complete"
