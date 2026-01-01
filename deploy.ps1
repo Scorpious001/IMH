@@ -38,14 +38,12 @@ Write-Host "Checking for uncommitted changes..." -ForegroundColor Yellow
 $status = git status --porcelain
 if ($status) {
     Write-Host "Found uncommitted changes. Staging all changes..." -ForegroundColor Yellow
-    # Stage modified files
-    git add -u 2>&1 | Out-Null
-    # Stage new files (excluding SSH INFO) - ignore warnings
+    # Use git add with explicit exclusions - faster approach
     $ErrorActionPreference = "SilentlyContinue"
-    Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notlike "*SSH INFO*" -and $_.FullName -notlike "*.git*" } | ForEach-Object {
-        $relativePath = $_.FullName.Replace((Get-Location).Path + "\", "").Replace("\", "/")
-        git add $relativePath 2>&1 | Out-Null
-    }
+    # Add modified and new files, but skip SSH INFO
+    git add -A 2>&1 | Where-Object { $_ -notmatch "SSH INFO|Permission denied|fatal" } | Out-Null
+    # Force remove SSH INFO from staging if it got added
+    git reset -- "SSH INFO/" 2>&1 | Out-Null
     $ErrorActionPreference = "Stop"
     
     Write-Host "Committing changes with message: $CommitMessage" -ForegroundColor Yellow
