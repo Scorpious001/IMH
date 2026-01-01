@@ -297,9 +297,7 @@ class Command(BaseCommand):
             batch = []
             for item, location in selected[i:i+batch_size]:
                 on_hand = Decimal(str(round(uniform(0, 1000), 2)))
-                par_min = Decimal(str(round(uniform(10, 100), 2)))
-                par_max_multiplier = Decimal(str(round(uniform(1.5, 3.0), 2)))
-                par_max = Decimal(str(round(float(par_min) * float(par_max_multiplier), 2)))
+                par = Decimal(str(round(uniform(10, 100), 2)))
                 
                 reserved_max = float(on_hand) * 0.3
                 reserved_qty = Decimal(str(round(uniform(0, reserved_max), 2)))
@@ -309,8 +307,7 @@ class Command(BaseCommand):
                     location=location,
                     on_hand_qty=on_hand,
                     reserved_qty=reserved_qty,
-                    par_min=par_min,
-                    par_max=par_max,
+                    par=par,
                     last_counted_at=fake.date_time_between(start_date='-6m', end_date='now') if fake.boolean(chance_of_getting_true=40) else None,
                     last_counted_by=choice(User.objects.all()) if fake.boolean(chance_of_getting_true=30) else None
                 )

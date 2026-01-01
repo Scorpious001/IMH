@@ -5,7 +5,7 @@ Write-Host "Starting Django Backend Server..." -ForegroundColor Green
 Write-Host ""
 
 # Navigate to backend directory
-$backendPath = Join-Path $PSScriptRoot "IMH\backend"
+$backendPath = Join-Path $PSScriptRoot "backend"
 Set-Location $backendPath
 
 Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow

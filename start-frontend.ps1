@@ -5,7 +5,7 @@ Write-Host "Starting React Frontend..." -ForegroundColor Green
 Write-Host ""
 
 # Navigate to frontend directory
-$frontendPath = Join-Path $PSScriptRoot "IMH\frontend"
+$frontendPath = Join-Path $PSScriptRoot "frontend"
 Set-Location $frontendPath
 
 Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow

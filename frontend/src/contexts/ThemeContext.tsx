@@ -48,10 +48,20 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return { ...defaultTheme, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored);
+        // Validate parsed data structure
+        if (parsed && typeof parsed === 'object') {
+          return { ...defaultTheme, ...parsed };
+        }
       }
     } catch (error) {
       console.error('Error loading theme from localStorage:', error);
+      // Clear corrupted data
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        // Ignore errors when clearing
+      }
     }
     return defaultTheme;
   });

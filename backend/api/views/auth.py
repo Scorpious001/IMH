@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from imh_ims.models import UserProfile
@@ -49,7 +50,10 @@ class LoginView(APIView):
                 # If permissions table doesn't exist yet, return empty list
                 pass
             
-            return Response({
+            # Get or create token for mobile app authentication
+            token, created = Token.objects.get_or_create(user=user)
+            
+            response_data = {
                 'message': 'Login successful',
                 'user': {
                     'id': user.id,
@@ -61,8 +65,11 @@ class LoginView(APIView):
                     'last_name': user.last_name,
                     'role': role,
                     'permissions': permissions
-                }
-            })
+                },
+                'token': token.key  # Include token for mobile apps
+            }
+            
+            return Response(response_data)
         else:
             return Response(
                 {'error': 'Invalid username or password'},

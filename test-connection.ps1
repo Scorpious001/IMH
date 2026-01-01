@@ -40,7 +40,7 @@ try {
     Write-Host "     Error: $($_.Exception.Message)" -ForegroundColor Red
     if ($_.Exception.Message -match "Unable to connect") {
         Write-Host "     → Backend server is not running. Start it with:" -ForegroundColor Yellow
-        Write-Host "       cd IMH\backend" -ForegroundColor White
+        Write-Host "       cd backend" -ForegroundColor White
         Write-Host "       .\venv\Scripts\python.exe manage.py runserver" -ForegroundColor White
     }
 }
@@ -66,7 +66,7 @@ try {
         Write-Host "     Error: $($_.Exception.Message)" -ForegroundColor Red
         if ($_.Exception.Message -match "Unable to connect") {
             Write-Host "     → Frontend server is not running. Start it with:" -ForegroundColor Yellow
-            Write-Host "       cd IMH\frontend" -ForegroundColor White
+            Write-Host "       cd frontend" -ForegroundColor White
             Write-Host "       npm start" -ForegroundColor White
         }
     }
@@ -97,9 +97,9 @@ Write-Host ""
 
 # Check configuration
 Write-Host "5. Checking configuration..." -ForegroundColor Yellow
-$backendSettings = Test-Path "IMH\backend\imh\settings.py"
-$frontendEnv = Test-Path "IMH\frontend\.env"
-$frontendPackage = Test-Path "IMH\frontend\package.json"
+$backendSettings = Test-Path "backend\imh\settings.py"
+$frontendEnv = Test-Path "frontend\.env"
+$frontendPackage = Test-Path "frontend\package.json"
 
 if ($backendSettings) {
     Write-Host "   ✓ Backend settings file exists" -ForegroundColor Green
@@ -110,7 +110,7 @@ if ($backendSettings) {
 if ($frontendEnv) {
     Write-Host "   ✓ Frontend .env file exists" -ForegroundColor Green
     Write-Host "     Contents:" -ForegroundColor Gray
-    Get-Content "IMH\frontend\.env" | ForEach-Object { Write-Host "       $_" -ForegroundColor Gray }
+    Get-Content "frontend\.env" | ForEach-Object { Write-Host "       $_" -ForegroundColor Gray }
 } else {
     Write-Host "   ⚠ Frontend .env file not found (will use default port 3000)" -ForegroundColor Yellow
 }
@@ -144,19 +144,17 @@ if ($backendPort -and $frontendWorking) {
     Write-Host "Next steps:" -ForegroundColor Yellow
     if (-not $backendPort) {
         Write-Host "  1. Start the backend server" -ForegroundColor White
-        Write-Host "     cd IMH\backend" -ForegroundColor Gray
+        Write-Host "     cd backend" -ForegroundColor Gray
         Write-Host "     .\venv\Scripts\python.exe manage.py runserver" -ForegroundColor Gray
     }
     if (-not $frontendPort3001 -and -not $frontendPort3000) {
         Write-Host "  2. Start the frontend server" -ForegroundColor White
-        Write-Host "     cd IMH\frontend" -ForegroundColor Gray
+        Write-Host "     cd frontend" -ForegroundColor Gray
         Write-Host "     npm start" -ForegroundColor Gray
     }
     Write-Host ""
     Write-Host "  Or use the startup script:" -ForegroundColor White
-    Write-Host "     cd IMH" -ForegroundColor Gray
     Write-Host "     powershell -ExecutionPolicy Bypass -File .\start-all.ps1" -ForegroundColor Gray
 }
 
 Write-Host ""
-

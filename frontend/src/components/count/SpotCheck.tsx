@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { itemsService } from '../../services/itemsService';
 import { locationsService } from '../../services/locationsService';
 import { stockService } from '../../services/stockService';
@@ -53,15 +53,6 @@ const SpotCheck: React.FC<SpotCheckProps> = ({ onSubmit, onCancel }) => {
     }
   }, [itemSearchTerm, items]);
 
-  useEffect(() => {
-    if (formData.item_id && formData.location_id) {
-      loadCurrentQuantity();
-    } else {
-      setCurrentQty(null);
-      setFormData((prev) => ({ ...prev, counted_qty: 0 }));
-    }
-  }, [formData.item_id, formData.location_id]);
-
   const loadData = async () => {
     try {
       const [itemsData, locationsData] = await Promise.all([
@@ -76,12 +67,12 @@ const SpotCheck: React.FC<SpotCheckProps> = ({ onSubmit, onCancel }) => {
     }
   };
 
-  const loadCurrentQuantity = async () => {
+  const loadCurrentQuantity = useCallback(async (itemId: number, locationId: number) => {
     try {
       setLoadingQty(true);
       const stockLevels = await stockService.getAll({
-        item_id: formData.item_id,
-        location_id: formData.location_id,
+        item_id: itemId,
+        location_id: locationId,
       });
       if (stockLevels.length > 0) {
         const qty = Number(stockLevels[0].on_hand_qty);
@@ -97,7 +88,16 @@ const SpotCheck: React.FC<SpotCheckProps> = ({ onSubmit, onCancel }) => {
     } finally {
       setLoadingQty(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (formData.item_id && formData.location_id) {
+      loadCurrentQuantity(formData.item_id, formData.location_id);
+    } else {
+      setCurrentQty(null);
+      setFormData((prev) => ({ ...prev, counted_qty: 0 }));
+    }
+  }, [formData.item_id, formData.location_id, loadCurrentQuantity]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +140,6 @@ const SpotCheck: React.FC<SpotCheckProps> = ({ onSubmit, onCancel }) => {
   };
 
   const selectedItem = items.find((i) => i.id === formData.item_id);
-  const selectedLocation = locations.find((l) => l.id === formData.location_id);
   const variance = currentQty !== null
     ? formData.counted_qty - currentQty
     : 0;
@@ -267,9 +266,6 @@ const SpotCheck: React.FC<SpotCheckProps> = ({ onSubmit, onCancel }) => {
               disabled={loading}
             >
               <option value="">Select reason (optional)</option>
-              <option value="ADJUST">Adjust</option>
-              <option value="CORRECTION">Correction</option>
-              <option value="SPOT_CHECK">Spot Check</option>
               <option value="LOST">Lost</option>
               <option value="DAMAGED">Damaged</option>
               <option value="VENDOR_ERROR">Vendor Error</option>

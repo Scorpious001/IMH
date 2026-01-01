@@ -58,6 +58,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Handle JSON parsing errors (axios throws these when response is not valid JSON)
+    if (error.message && (error.message.includes('JSON') || error.message.includes('Unexpected token'))) {
+      console.error('JSON parsing error:', error);
+      console.error('Response data:', error.response?.data);
+      return Promise.reject(new Error('Failed to parse server response. The server may have returned invalid JSON.'));
+    }
+    
     if (error.response?.status === 401) {
       // Handle unauthorized - clear any auth state
       localStorage.removeItem('authToken');
