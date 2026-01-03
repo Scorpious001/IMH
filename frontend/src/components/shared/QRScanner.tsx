@@ -48,17 +48,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         return;
       }
 
-      // Check if we're on HTTPS (required for camera access in most browsers)
-      const isSecure = window.location.protocol === 'https:' || 
-                       window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1';
-      
-      if (!isSecure) {
-        setError('Camera access requires HTTPS. Please access the site using HTTPS (https://) instead of HTTP.');
-        setIsScanning(false);
-        return;
-      }
-
       const scannerId = scannerRef.current.id || 'qr-scanner';
       const html5QrCode = new Html5Qrcode(scannerId);
       html5QrCodeRef.current = html5QrCode;
@@ -125,8 +114,8 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         errorMessage = 'Camera permission denied. Please allow camera access in your browser settings and try again.';
       } else if (err.name === 'NotFoundError' || err.message?.includes('camera') || err.message?.includes('No cameras')) {
         errorMessage = 'No camera found on this device.';
-      } else if (err.message?.includes('HTTPS')) {
-        errorMessage = err.message;
+      } else if (err.message?.includes('secure') || err.message?.includes('HTTPS') || err.message?.includes('getUserMedia')) {
+        errorMessage = 'Camera access may require HTTPS. Some browsers block camera access on HTTP connections. You can still use manual code entry below.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -233,9 +222,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         {error && (
           <div className="qr-scanner-error">
             <p>{error}</p>
-            {error.includes('HTTPS') ? (
+            {error.includes('HTTPS') || error.includes('secure') ? (
               <div className="https-warning">
-                <p><strong>Note:</strong> Camera access requires a secure connection (HTTPS).</p>
+                <p><strong>Note:</strong> Some browsers require HTTPS for camera access.</p>
                 <p>You can still use the manual code entry below to look up items.</p>
               </div>
             ) : (
