@@ -20,6 +20,11 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Debug logging to verify API URL
+console.log('API Base URL:', API_BASE_URL);
+console.log('Current hostname:', window.location.hostname);
+console.log('Current origin:', window.location.origin);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
