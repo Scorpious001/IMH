@@ -198,6 +198,10 @@ SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_SAVE_EVERY_REQUEST = True
+# Don't set a domain - let browser use default (current domain)
+SESSION_COOKIE_DOMAIN = None
+# Set cookie path to root so it works for all paths
+SESSION_COOKIE_PATH = '/'
 
 # Logging configuration
 LOGGING = {

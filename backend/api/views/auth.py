@@ -32,6 +32,14 @@ class LoginView(APIView):
                 )
             
             login(request, user)
+            
+            # Debug: Log session info
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f'Login successful for user {user.username}')
+            logger.info(f'Session key: {request.session.session_key}')
+            logger.info(f'User authenticated: {request.user.is_authenticated}')
+            
             # Get user role
             try:
                 profile = user.profile
@@ -69,7 +77,16 @@ class LoginView(APIView):
                 'token': token.key  # Include token for mobile apps
             }
             
-            return Response(response_data)
+            response = Response(response_data)
+            
+            # Ensure session is saved
+            request.session.save()
+            
+            # Debug: Log cookie info
+            logger.info(f'Response cookies: {response.cookies}')
+            logger.info(f'Session cookie name: {request.session.cookie_name}')
+            
+            return response
         else:
             return Response(
                 {'error': 'Invalid username or password'},
