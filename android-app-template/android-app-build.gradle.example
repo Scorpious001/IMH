@@ -1,0 +1,51 @@
+// Example build.gradle configuration for Android app signing
+// Copy this to android/app/build.gradle and update with your keystore information
+// 
+// IMPORTANT: Never commit your keystore file or passwords to version control!
+
+android {
+    // ... existing configuration ...
+
+    signingConfigs {
+        release {
+            // Path to your keystore file (relative to android/app/)
+            storeFile file('imh-ims-key.keystore')
+            // Keystore password - store in environment variable or local.properties
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD") ?: ""
+            // Key alias
+            keyAlias "imh-ims"
+            // Key password - can be same as keystore password
+            keyPassword System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD") ?: ""
+        }
+    }
+
+    buildTypes {
+        release {
+            // Enable signing
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+// Alternative: Store passwords in local.properties (not committed to git)
+// Create android/local.properties:
+// KEYSTORE_PASSWORD=your-keystore-password
+// KEY_PASSWORD=your-key-password
+//
+// Then in build.gradle:
+// def keystorePropertiesFile = rootProject.file("local.properties")
+// def keystoreProperties = new Properties()
+// if (keystorePropertiesFile.exists()) {
+//     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+// }
+//
+// signingConfigs {
+//     release {
+//         storeFile file('imh-ims-key.keystore')
+//         storePassword keystoreProperties['KEYSTORE_PASSWORD']
+//         keyAlias "imh-ims"
+//         keyPassword keystoreProperties['KEY_PASSWORD']
+//     }
+// }

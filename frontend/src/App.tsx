@@ -15,6 +15,7 @@ import CountsPage from './pages/Counts/CountsPage';
 import ReportsPage from './pages/Reports/ReportsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import UsersPage from './pages/Users/UsersPage';
+import DownloadPage from './pages/Download/DownloadPage';
 import './App.css';
 import './styles/theme.css';
 
@@ -134,6 +135,10 @@ const AppRoutes: React.FC = () => {
             </MobileLayout>
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/download"
+        element={<DownloadPage />}
       />
     </Routes>
   );

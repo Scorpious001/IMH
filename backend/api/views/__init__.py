@@ -9,6 +9,7 @@ from .settings import CategoriesViewSet, VendorsViewSet, ParLevelsView, Category
 from .auth import LoginView, LogoutView, UserInfoView, CSRFTokenView
 from .users import UserViewSet
 from .purchase_requests import PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView
+from .app import AppDownloadView, AppVersionView
 
 __all__ = [
     'ItemViewSet',
@@ -46,5 +47,7 @@ __all__ = [
     'PurchaseRequestViewSet',
     'PurchaseRequestApproveView',
     'PurchaseRequestDenyView',
+    'AppDownloadView',
+    'AppVersionView',
 ]
 

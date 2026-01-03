@@ -10,7 +10,8 @@ from api.views import (
     AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView,
     CategoriesViewSet, VendorsViewSet, ParLevelsView, CategoryParLevelsView, BulkApplyCategoryParLevelsView,
     LoginView, LogoutView, UserInfoView, CSRFTokenView,
-    UserViewSet, PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView
+    UserViewSet, PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView,
+    AppDownloadView, AppVersionView
 )
 
 router = DefaultRouter()
@@ -69,5 +70,9 @@ urlpatterns = [
     # Purchase Requests
     path('purchase-requests/<int:purchase_request_id>/approve/', PurchaseRequestApproveView.as_view(), name='purchase-request-approve'),
     path('purchase-requests/<int:purchase_request_id>/deny/', PurchaseRequestDenyView.as_view(), name='purchase-request-deny'),
+    
+    # App Download
+    path('app/download/', AppDownloadView.as_view(), name='app-download'),
+    path('app/version/', AppVersionView.as_view(), name='app-version'),
 ]
 

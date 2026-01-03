@@ -1,5 +1,9 @@
 {
   "name": "imhimsandroid",
-  "displayName": "IMH IMS"
+  "displayName": "IMH IMS",
+  "version": "1.0.0",
+  "description": "IMH Inventory Management System - Mobile App",
+  "packageName": "com.imh.ims",
+  "buildNumber": "1"
 }
 

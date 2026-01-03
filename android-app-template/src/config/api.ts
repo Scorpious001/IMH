@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Production API URL - Update this with your AWS backend URL
 export const API_BASE_URL = __DEV__ 
   ? 'http://10.0.2.2:8000/api' // Android emulator localhost
-  : 'https://your-aws-backend-url.com/api'; // Production AWS URL
+  : 'http://3.234.249.243/api'; // Production EC2 URL (update to HTTPS when SSL is configured)
 
 const api = axios.create({
   baseURL: API_BASE_URL,

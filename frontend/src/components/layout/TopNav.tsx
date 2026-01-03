@@ -58,6 +58,12 @@ const TopNav: React.FC = () => {
               {item.label}
             </Link>
           ))}
+          <Link
+            to="/download"
+            className={`nav-link ${isActive('/download') ? 'active' : ''}`}
+          >
+            📱 Download App
+          </Link>
           {user && (
             <>
               <button 
@@ -101,6 +107,13 @@ const TopNav: React.FC = () => {
               {item.label}
             </Link>
           ))}
+          <Link
+            to="/download"
+            className={`nav-link ${isActive('/download') ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            📱 Download App
+          </Link>
           {user && (
             <>
               <button 
