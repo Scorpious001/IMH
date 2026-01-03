@@ -100,16 +100,10 @@ export const itemsService = {
   getQRCode: async (id: number, size: number = 200): Promise<string> => {
     // Returns the QR code image URL
     // Use relative URL in production, absolute in development
-    const getBaseUrl = () => {
-      if (process.env.REACT_APP_API_URL) {
-        return process.env.REACT_APP_API_URL;
-      }
-      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        return '/api';
-      }
-      return 'http://localhost:8000/api';
-    };
-    const baseUrl = getBaseUrl();
+    const hostname = window.location.hostname;
+    const baseUrl = (hostname !== 'localhost' && hostname !== '127.0.0.1') 
+      ? '/api' 
+      : (process.env.REACT_APP_API_URL || 'http://localhost:8000/api');
     return `${baseUrl}/items/${id}/qr-code/?size=${size}`;
   },
 };

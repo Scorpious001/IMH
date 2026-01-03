@@ -1,32 +1,43 @@
 import axios from 'axios';
 
-// Determine API base URL
-// In production (when served from same domain), use relative URL
-// In development, use localhost or env variable
+// Determine API base URL at runtime
+// Always use relative URL when not on localhost (production)
+// This ensures cookies are sent correctly for session-based auth
 const getApiBaseUrl = () => {
-  // If REACT_APP_API_URL is set, use it
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
+  // Always use relative URL in production (when not on localhost)
+  // This ensures session cookies work correctly
+  const hostname = window.location.hostname;
+  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    return '/api';
   }
   
-  // If we're in production (not localhost), use relative URL
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
+  // Only use absolute URL for local development
+  // Check if REACT_APP_API_URL is set for local dev override
+  const envUrl = process.env.REACT_APP_API_URL;
+  if (envUrl && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+    return envUrl;
   }
   
   // Default to localhost for development
   return 'http://localhost:8000/api';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+// Get API URL at runtime, not build time
+let API_BASE_URL: string | null = null;
 
-// Debug logging to verify API URL
-console.log('API Base URL:', API_BASE_URL);
-console.log('Current hostname:', window.location.hostname);
-console.log('Current origin:', window.location.origin);
+const getApiUrl = () => {
+  if (!API_BASE_URL) {
+    API_BASE_URL = getApiBaseUrl();
+    // Debug logging to verify API URL
+    console.log('API Base URL:', API_BASE_URL);
+    console.log('Current hostname:', window.location.hostname);
+    console.log('Current origin:', window.location.origin);
+  }
+  return API_BASE_URL;
+};
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
