@@ -14,7 +14,7 @@ import CategoryParLevels from '../../components/catalog/CategoryParLevels';
 import './CatalogPage.css';
 
 const CatalogPage: React.FC = () => {
-  const { hasPermission, user } = useAuth();
+  const { hasPermission, user, isLoading } = useAuth();
   const canView = hasPermission('catalog', 'view');
   const canCreate = hasPermission('catalog', 'create');
   const canEdit = hasPermission('catalog', 'edit');
@@ -32,20 +32,26 @@ const CatalogPage: React.FC = () => {
   const [showCategoryParLevels, setShowCategoryParLevels] = useState(false);
 
   useEffect(() => {
-    if (canView) {
-      loadItems();
-      loadCategories();
-    } else {
-      setError('You do not have permission to view the catalog.');
-      setLoading(false);
-    }
-  }, [filterBelowPar, selectedCategory, canView]);
-
-  const loadItems = async () => {
-    if (!canView) {
-      setError('You do not have permission to view the catalog.');
+    // Wait for auth to finish loading before checking permissions
+    if (isLoading) {
       return;
     }
+    
+    // If user is authenticated, try to load items - let the backend handle permission checks
+    // This is more reliable than frontend permission checks
+    if (user && user.id) {
+      loadItems();
+      loadCategories();
+    } else if (!user && !isLoading) {
+      // Only show error if we're sure user isn't logged in
+      setError('Please log in to view the catalog.');
+      setLoading(false);
+    }
+  }, [filterBelowPar, selectedCategory, canView, isLoading, user]);
+
+  const loadItems = async () => {
+    // Don't check permissions here - let the backend API handle it
+    // If the user doesn't have permission, the API will return 403 and we'll show the error
 
     try {
       setLoading(true);
@@ -61,11 +67,20 @@ const CatalogPage: React.FC = () => {
         params.search = searchTerm;
       }
       const data = await itemsService.getAll(params);
+      console.log('Items loaded:', data.length, 'items');
+      console.log('First few items:', data.slice(0, 3));
       setItems(data);
+      // Clear any previous errors on success
+      setError(null);
     } catch (error: any) {
       console.error('Error loading items:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       if (error.response?.status === 403) {
-        setError('You do not have permission to view the catalog. Please contact an administrator.');
+        setError('You do not have permission to view the catalog. Please contact an administrator. (Error 403 from API)');
       } else if (error.response?.status === 401) {
         setError('Your session has expired. Please log in again.');
       } else {
@@ -126,29 +141,37 @@ const CatalogPage: React.FC = () => {
     loadItems();
   };
 
-  // Show access denied if user doesn't have view permission
-  if (!canView) {
-    return (
-      <div className="catalog-page">
-        <div className="access-denied">
-          <h2>Access Denied</h2>
-          <p>You do not have permission to view the catalog.</p>
-          <p>Required permission: <code>catalog.view</code></p>
-          <p>Your current permissions: {user?.permissions?.join(', ') || 'None'}</p>
-          <p>Please contact an administrator to request access.</p>
-        </div>
-      </div>
-    );
-  }
+  // REMOVED: Frontend permission check - let the backend API handle permissions
+  // This way authenticated users can try to load items, and the backend will enforce permissions
 
   if (loading && items.length === 0 && !error) {
     return <div className="page-loading">Loading...</div>;
   }
 
   // Filter items based on selected category if in tile/list view
-  const displayItems = selectedCategory
+  let displayItems = selectedCategory
     ? items.filter((item) => item.category === selectedCategory)
     : items;
+  
+  // Apply search filter if search term exists
+  if (searchTerm && searchTerm.trim()) {
+    const searchLower = searchTerm.toLowerCase();
+    displayItems = displayItems.filter((item) => 
+      item.name.toLowerCase().includes(searchLower) ||
+      item.short_code.toLowerCase().includes(searchLower)
+    );
+  }
+  
+  // Debug logging
+  console.log('CatalogPage render:', {
+    totalItems: items.length,
+    displayItemsCount: displayItems.length,
+    selectedCategory,
+    searchTerm,
+    viewMode,
+    loading,
+    hasError: !!error
+  });
 
   return (
     <div className="catalog-page">
@@ -230,9 +253,63 @@ const CatalogPage: React.FC = () => {
         <CategoryView onCategorySelect={handleCategorySelect} />
       )}
 
-      {viewMode === 'list' && <ListView items={displayItems} />}
+      {viewMode === 'list' && (
+        displayItems.length > 0 ? (
+          <ListView items={displayItems} />
+        ) : (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>No items found</p>
+            {items.length === 0 && !loading && !error && (
+              <p>Items are loading or there are no items in the catalog.</p>
+            )}
+            {items.length > 0 && displayItems.length === 0 && (
+              <>
+                <p>No items match your current filters.</p>
+                {(searchTerm || selectedCategory) && (
+                  <button 
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedCategory(null);
+                    }}
+                    style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )
+      )}
 
-      {viewMode === 'tile' && <TileView items={displayItems} />}
+      {viewMode === 'tile' && (
+        displayItems.length > 0 ? (
+          <TileView items={displayItems} />
+        ) : (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>No items found</p>
+            {items.length === 0 && !loading && !error && (
+              <p>Items are loading or there are no items in the catalog.</p>
+            )}
+            {items.length > 0 && displayItems.length === 0 && (
+              <>
+                <p>No items match your current filters.</p>
+                {(searchTerm || selectedCategory) && (
+                  <button 
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedCategory(null);
+                    }}
+                    style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )
+      )}
 
       {showAddItemForm && (
         <div className="modal-overlay" onClick={() => setShowAddItemForm(false)}>

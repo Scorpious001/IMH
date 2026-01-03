@@ -9,8 +9,50 @@ export const itemsService = {
     search?: string;
     critical?: boolean;
   }): Promise<Item[]> => {
-    const response = await api.get('/items/', { params });
-    return response.data.results || response.data;
+    console.log('Calling items API with params:', params);
+    const response = await api.get('/items/', { 
+      params,
+      withCredentials: true, // Ensure cookies are sent
+    });
+    console.log('Items API response:', { status: response.status, dataLength: response.data?.results?.length || response.data?.length });
+    const data = response.data;
+    
+    // Handle paginated response
+    if (data.results) {
+      let allItems = [...data.results];
+      
+      // If there are more pages, fetch them all
+      if (data.next) {
+        let nextUrl = data.next;
+        while (nextUrl) {
+          try {
+            // Handle both absolute and relative URLs
+            let apiPath = nextUrl;
+            if (nextUrl.startsWith('http://') || nextUrl.startsWith('https://')) {
+              // Extract the path from absolute URL
+              const urlObj = new URL(nextUrl);
+              apiPath = urlObj.pathname + urlObj.search;
+            }
+            
+            const nextResponse = await api.get(apiPath);
+            if (nextResponse.data.results) {
+              allItems = [...allItems, ...nextResponse.data.results];
+              nextUrl = nextResponse.data.next;
+            } else {
+              break;
+            }
+          } catch (error) {
+            console.error('Error fetching next page:', error);
+            break;
+          }
+        }
+      }
+      
+      return allItems;
+    }
+    
+    // Non-paginated response
+    return Array.isArray(data) ? data : [];
   },
 
   getById: async (id: number): Promise<Item> => {
@@ -48,6 +90,27 @@ export const itemsService = {
       formData
     );
     return response.data;
+  },
+
+  lookupByCode: async (shortCode: string): Promise<Item> => {
+    const response = await api.get(`/items/lookup/${shortCode}/`);
+    return response.data;
+  },
+
+  getQRCode: async (id: number, size: number = 200): Promise<string> => {
+    // Returns the QR code image URL
+    // Use relative URL in production, absolute in development
+    const getBaseUrl = () => {
+      if (process.env.REACT_APP_API_URL) {
+        return process.env.REACT_APP_API_URL;
+      }
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return '/api';
+      }
+      return 'http://localhost:8000/api';
+    };
+    const baseUrl = getBaseUrl();
+    return `${baseUrl}/items/${id}/qr-code/?size=${size}`;
   },
 };
 

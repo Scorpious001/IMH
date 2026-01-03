@@ -37,13 +37,20 @@ def check_permission(user, module, action):
     Check if a user has a specific permission.
     Admins have all permissions by default.
     """
+    # Superusers have all permissions
+    if user.is_superuser:
+        return True
+    
     try:
         profile = user.profile
         if profile.is_admin:
             return True
         return profile.has_permission(module, action)
     except AttributeError:
-        # User doesn't have a profile
+        # User doesn't have a profile - deny access
+        return False
+    except Exception as e:
+        # Any other error - deny access
         return False
 
 

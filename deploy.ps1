@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SERVER_HOST = "ubuntu@3.239.160.128"  # EC2 server IP address
+$SERVER_HOST = "ubuntu@3.234.249.243"  # EC2 server IP address
 $REPO_PATH = "SPS-IMH"  # Repository path on EC2 server (usually /home/ubuntu/SPS-IMH)
 $BRANCH = "main"  # or "master" depending on your default branch
 
@@ -101,6 +101,35 @@ if ($checkRepo -match "NOT_FOUND") {
     }
 }
 
+# Step 3a: Build frontend if needed
+Write-Host ""
+Write-Host "Checking frontend build..." -ForegroundColor Yellow
+if (-not (Test-Path "frontend\build")) {
+    Write-Host "Frontend build not found. Building frontend..." -ForegroundColor Yellow
+    Push-Location "frontend"
+    npm run build
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Frontend build failed!" -ForegroundColor Red
+        Pop-Location
+        exit 1
+    }
+    Pop-Location
+    Write-Host "Frontend built successfully" -ForegroundColor Green
+} else {
+    Write-Host "Frontend build found" -ForegroundColor Green
+}
+
+# Step 3b: Copy frontend build to server
+Write-Host ""
+Write-Host "Copying frontend build to server..." -ForegroundColor Yellow
+$frontendBuildPath = Join-Path $PSScriptRoot "frontend\build"
+scp -i "$SSH_KEY" -r "$frontendBuildPath\*" "${SERVER_HOST}:~/$REPO_PATH/frontend-build/" 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Warning: Failed to copy frontend build. Continuing with backend deployment..." -ForegroundColor Yellow
+} else {
+    Write-Host "Frontend build copied successfully" -ForegroundColor Green
+}
+
 # Build deployment command with first-time setup check
 $deployCommand = "cd ~/$REPO_PATH && git pull origin $BRANCH && cd backend && if [ ! -d 'venv' ] || [ ! -f 'venv/bin/activate' ]; then echo 'Setting up virtual environment for first time...' && if ! python3 -m venv --help >/dev/null 2>&1; then echo 'Installing python3-venv package...' && sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq && (sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3.12-venv 2>/dev/null || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-venv); fi && rm -rf venv && python3 -m venv venv && source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt && pip install gunicorn psycopg2-binary dj-database-url; else source venv/bin/activate; fi && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && python manage.py collectstatic --noinput && if systemctl is-active --quiet imh-ims 2>/dev/null; then sudo systemctl restart imh-ims && sleep 3 && sudo systemctl status imh-ims --no-pager -l; else echo 'Gunicorn service not set up yet. Skipping restart.' && echo 'Run first-time-server-setup.sh to complete server setup.'; fi && echo 'Backend deployment complete'"
 
@@ -113,8 +142,8 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "Deployment completed successfully!" -ForegroundColor Green
-Write-Host "Application is live at: http://3.239.160.128" -ForegroundColor Cyan
-Write-Host "API endpoint: http://3.239.160.128/api/" -ForegroundColor Cyan
+Write-Host "Application is live at: http://3.234.249.243" -ForegroundColor Cyan
+Write-Host "API endpoint: http://3.234.249.243/api/" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  - Check backend logs: ssh -i `"$SSH_KEY`" $SERVER_HOST sudo journalctl -u imh-ims -n 50" -ForegroundColor Gray

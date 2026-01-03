@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import QRScanner from '../shared/QRScanner';
 import './TopNav.css';
 
 const TopNav: React.FC = () => {
@@ -8,6 +9,7 @@ const TopNav: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout, canViewModule } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -58,6 +60,14 @@ const TopNav: React.FC = () => {
           ))}
           {user && (
             <>
+              <button 
+                onClick={() => setShowQRScanner(true)} 
+                className="nav-qr-scanner"
+                title="Scan QR Code"
+                aria-label="Scan QR Code"
+              >
+                📷 Scan
+              </button>
               <span className="nav-user">({user.username})</span>
               <button onClick={handleLogout} className="nav-logout">
                 Logout
@@ -93,6 +103,15 @@ const TopNav: React.FC = () => {
           ))}
           {user && (
             <>
+              <button 
+                onClick={() => {
+                  setShowQRScanner(true);
+                  setIsMenuOpen(false);
+                }} 
+                className="nav-qr-scanner-mobile"
+              >
+                📷 Scan QR Code
+              </button>
               <div className="nav-user-mobile">Logged in as: {user.username}</div>
               <button onClick={handleLogout} className="nav-logout-mobile">
                 Logout
@@ -100,6 +119,16 @@ const TopNav: React.FC = () => {
             </>
           )}
         </div>
+      )}
+
+      {showQRScanner && (
+        <QRScanner
+          onClose={() => setShowQRScanner(false)}
+          onScan={(code) => {
+            setShowQRScanner(false);
+            // Navigation is handled inside QRScanner component
+          }}
+        />
       )}
     </nav>
   );

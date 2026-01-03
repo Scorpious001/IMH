@@ -6,6 +6,7 @@ import { Item, StockByLocationData, StockByLocationItem } from '../../types/item
 import { InventoryTransaction } from '../../types/stock.types';
 import StatusIndicator from '../../components/shared/StatusIndicator';
 import PhotoUpload from '../../components/shared/PhotoUpload';
+import QRCodeDisplay from '../../components/shared/QRCodeDisplay';
 import StockLevelsList from '../../components/item/StockLevelsList';
 import UsageChart from '../../components/item/UsageChart';
 import TransactionHistory from '../../components/item/TransactionHistory';
@@ -279,6 +280,15 @@ const ItemDetailPage: React.FC = () => {
                 unitOfMeasure={item.unit_of_measure}
                 onUpdate={loadItemData}
               />
+              <div className="qr-code-section">
+                <h3>QR Code</h3>
+                <QRCodeDisplay 
+                  value={item.short_code} 
+                  itemName={item.name}
+                  size={200}
+                  showActions={true}
+                />
+              </div>
               <div className="edit-section">
                 <EditItemForm item={item} onUpdate={handleItemUpdate} />
               </div>

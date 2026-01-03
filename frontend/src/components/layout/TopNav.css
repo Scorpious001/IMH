@@ -87,6 +87,45 @@
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
+.nav-qr-scanner {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-left: 1rem;
+  min-height: 44px; /* Touch target */
+}
+
+.nav-qr-scanner:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+.nav-qr-scanner-mobile {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: all 0.2s;
+  min-height: 44px; /* Touch target */
+}
+
+.nav-qr-scanner-mobile:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
 .nav-user {
   color: var(--nav-text, #9ca3af);
   font-size: 0.875rem;

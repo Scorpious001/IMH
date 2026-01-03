@@ -1,0 +1,139 @@
+.qr-code-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.qr-code-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.qr-code-label {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.qr-item-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.qr-item-code {
+  font-size: 14px;
+  color: #666;
+  font-family: 'Courier New', monospace;
+}
+
+.qr-code-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.download-qr-btn,
+.print-qr-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.download-qr-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.download-qr-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.download-qr-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.print-qr-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.print-qr-btn:hover {
+  background-color: #545b62;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .qr-code-display {
+    padding: 15px;
+    margin: 15px 0;
+  }
+
+  .qr-code-container {
+    padding: 15px;
+  }
+
+  .qr-code-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .download-qr-btn,
+  .print-qr-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px; /* Larger touch targets */
+    min-height: 44px; /* iOS recommended touch target size */
+  }
+
+  .qr-item-name {
+    font-size: 18px;
+  }
+
+  .qr-item-code {
+    font-size: 16px;
+  }
+}
+
+/* High DPI displays (Retina, etc.) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .qr-code-svg {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Print styles */
+@media print {
+  .qr-code-display {
+    box-shadow: none;
+    border: 1px solid #000;
+    page-break-inside: avoid;
+  }
+
+  .qr-code-actions {
+    display: none;
+  }
+}

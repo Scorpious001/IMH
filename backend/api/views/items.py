@@ -13,6 +13,7 @@ import io
 from imh_ims.models import Item, StockLevel, InventoryTransaction, Category, Vendor, Location
 from api.serializers import ItemSerializer
 from imh_ims.services.stock_service import StockService
+from imh_ims.services.qr_service import generate_qr_code_response, generate_qr_code_base64
 from api.permissions import create_permission_class
 
 
@@ -146,6 +147,56 @@ class ItemViewSet(viewsets.ModelViewSet):
             'item_name': item.name,
             'transactions': serializer.data
         })
+
+    @action(detail=True, methods=['get'], url_path='qr-code')
+    def get_qr_code(self, request, pk=None):
+        """
+        Generate and return QR code image for item's short_code.
+        Returns PNG image that can be displayed or downloaded.
+        """
+        item = self.get_object()
+        # QR code contains the short_code for scanning
+        qr_data = item.short_code
+        size = int(request.query_params.get('size', 200))
+        error_correction = request.query_params.get('error_correction', 'M')
+        return generate_qr_code_response(qr_data, size, error_correction)
+
+    @action(detail=True, methods=['get'], url_path='qr-code-data')
+    def get_qr_code_data(self, request, pk=None):
+        """
+        Get QR code as base64-encoded string for embedding in JSON responses.
+        Useful for frontend display without separate image request.
+        """
+        item = self.get_object()
+        qr_data = item.short_code
+        size = int(request.query_params.get('size', 200))
+        error_correction = request.query_params.get('error_correction', 'M')
+        qr_base64 = generate_qr_code_base64(qr_data, size, error_correction)
+        
+        return Response({
+            'item_id': item.id,
+            'item_name': item.name,
+            'short_code': item.short_code,
+            'qr_code': qr_base64,
+            'qr_data': qr_data,  # The data encoded in QR code
+            'size': size
+        })
+
+    @action(detail=False, methods=['get'], url_path='lookup/(?P<short_code>[^/.]+)')
+    def lookup_by_code(self, request, short_code=None):
+        """
+        Look up item by short_code (for QR code scanning).
+        This endpoint is optimized for mobile QR scanners.
+        """
+        try:
+            item = Item.objects.get(short_code=short_code, is_active=True)
+            serializer = self.get_serializer(item)
+            return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {'error': f'Item with code "{short_code}" not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
     @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
     def bulk_import(self, request):

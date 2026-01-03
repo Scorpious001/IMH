@@ -148,6 +148,9 @@ REST_FRAMEWORK = {
 # Insert after CommonMiddleware
 common_middleware_idx = MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
 MIDDLEWARE.insert(common_middleware_idx + 1, 'api.middleware.NoCacheMiddleware')
+# Add auth debug middleware after authentication middleware
+auth_middleware_idx = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware')
+MIDDLEWARE.insert(auth_middleware_idx + 1, 'api.middleware.AuthDebugMiddleware')
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -157,12 +160,25 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "http://192.168.1.5:8000",  # Local network IP
     "http://172.28.208.1:8000",  # Alternative IP
+    "http://3.234.249.243",  # Production server
+    "http://ec2-3-234-249-243.compute-1.amazonaws.com",  # Production DNS
 ]
 
 # Allow Android app to connect from any origin (for development)
 CORS_ALLOW_ALL_ORIGINS = True  # For development - allows Android app
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # CSRF settings for CORS
 CSRF_TRUSTED_ORIGINS = [
@@ -170,9 +186,42 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
+    "http://3.234.249.243",
+    "http://ec2-3-234-249-243.compute-1.amazonaws.com",
 ]
 
 # CSRF cookie settings
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token
 SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+        },
+    },
+    'loggers': {
+        'api.middleware': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'api.permissions': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}

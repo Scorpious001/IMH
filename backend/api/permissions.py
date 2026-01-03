@@ -14,19 +14,44 @@ def create_permission_class(module, action):
         Admins bypass all permission checks.
         """
         def has_permission(self, request, view):
-            # Admins have all permissions
-            if request.user.is_authenticated:
-                try:
-                    if request.user.profile.is_admin:
-                        return True
-                except AttributeError:
-                    pass
-            
-            # Check specific permission
+            # Check authentication first
             if not request.user.is_authenticated:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f'Permission denied: User not authenticated. User: {request.user}, IsAuthenticated: {request.user.is_authenticated}')
                 return False
             
-            return check_permission(request.user, module, action)
+            # Admins have all permissions - check multiple ways
+            # First check if user is superuser (most reliable)
+            if request.user.is_superuser:
+                return True
+            
+            # Then check profile.is_admin
+            try:
+                if hasattr(request.user, 'profile'):
+                    profile = request.user.profile
+                    if profile.is_admin:
+                        return True
+            except (AttributeError, Exception) as e:
+                # If profile doesn't exist, that's okay - continue to permission check
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f'Profile check failed for user {request.user.username}: {e}')
+            
+            # Check specific permission
+            try:
+                has_perm = check_permission(request.user, module, action)
+                if not has_perm:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f'Permission denied: User {request.user.username} does not have {module}.{action} permission')
+                return has_perm
+            except Exception as e:
+                # If permission check fails, deny access
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f'Permission check error for user {request.user.username}: {e}')
+                return False
     
     return HasPermission
 

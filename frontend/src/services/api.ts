@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// Determine API base URL
+// In production (when served from same domain), use relative URL
+// In development, use localhost or env variable
+const getApiBaseUrl = () => {
+  // If REACT_APP_API_URL is set, use it
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // If we're in production (not localhost), use relative URL
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:8000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -91,9 +109,12 @@ export const authService = {
     if (!csrfToken) {
       await getCSRFToken();
     }
-    const response = await api.post('/auth/login/', { username, password });
+    const response = await api.post('/auth/login/', { username, password }, {
+      withCredentials: true, // Ensure cookies are sent
+    });
     // Refresh CSRF token after login
     await getCSRFToken();
+    console.log('Login successful, user data:', response.data);
     return response.data;
   },
   logout: async () => {
@@ -107,7 +128,10 @@ export const authService = {
     }
   },
   getUser: async () => {
-    const response = await api.get('/auth/user/');
+    const response = await api.get('/auth/user/', {
+      withCredentials: true, // Ensure cookies are sent
+    });
+    console.log('getUser response:', response.data);
     return response.data;
   },
 };

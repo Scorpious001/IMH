@@ -39,8 +39,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       const userData = await authService.getUser();
-      setUser(userData);
+      // Ensure user data is set correctly
+      if (userData) {
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
     } catch (error) {
+      // If not authenticated, that's okay - user will need to log in
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -49,9 +55,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string) => {
     try {
+      setIsLoading(true);
       const response = await authService.login(username, password);
-      setUser(response.user);
+      // The login response has { user: {...}, message: '...', token: '...' }
+      const userData = response.user || response;
+      // Ensure we have the user object with all fields
+      if (userData && (userData.role || userData.is_superuser)) {
+        setUser(userData);
+        setIsLoading(false);
+      } else {
+        // If user data is incomplete, fetch it
+        await checkAuth();
+      }
     } catch (error: any) {
+      setIsLoading(false);
       // Better error handling
       const errorMessage = error.response?.data?.error || 
                           error.message || 
@@ -71,9 +88,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const hasPermission = (module: string, action: string): boolean => {
-    if (!user) return false;
-    // Admins have all permissions
-    if (user.role === 'ADMIN') return true;
+    if (!user) {
+      return false;
+    }
+    
+    // Admins have all permissions - check multiple ways
+    // Check role from user object (case-insensitive)
+    if (user.role && String(user.role).toUpperCase() === 'ADMIN') {
+      return true;
+    }
+    
+    // Check is_superuser flag (explicitly check for true)
+    if (user.is_superuser === true) {
+      return true;
+    }
+    
+    // Check profile role
+    if (user.profile?.role && String(user.profile.role).toUpperCase() === 'ADMIN') {
+      return true;
+    }
+    
     // Check if user has the specific permission
     const permissionName = `${module}.${action}`;
     return user.permissions?.includes(permissionName) || false;
