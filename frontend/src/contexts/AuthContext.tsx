@@ -45,8 +45,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      // If not authenticated, that's okay - user will need to log in
+    } catch (error: any) {
+      // If not authenticated (401/403), that's okay - user will need to log in
+      // Log the error for debugging
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('User not authenticated - login required');
+      } else {
+        console.error('Error checking auth:', error);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);

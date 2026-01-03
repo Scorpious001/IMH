@@ -84,7 +84,8 @@ class LoginView(APIView):
             
             # Debug: Log cookie info
             logger.info(f'Response cookies: {response.cookies}')
-            logger.info(f'Session cookie name: {request.session.cookie_name}')
+            logger.info(f'Session key after login: {request.session.session_key}')
+            logger.info(f'Session modified: {request.session.modified}')
             
             return response
         else:
