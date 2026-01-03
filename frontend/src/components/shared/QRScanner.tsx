@@ -48,15 +48,35 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         return;
       }
 
+      // Check if we're on HTTPS (required for camera access in most browsers)
+      const isSecure = window.location.protocol === 'https:' || 
+                       window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+      
+      if (!isSecure) {
+        setError('Camera access requires HTTPS. Please access the site using HTTPS (https://) instead of HTTP.');
+        setIsScanning(false);
+        return;
+      }
+
       const scannerId = scannerRef.current.id || 'qr-scanner';
       const html5QrCode = new Html5Qrcode(scannerId);
       html5QrCodeRef.current = html5QrCode;
 
       // Try to get available cameras
-      const devices = await Html5Qrcode.getCameras();
+      let devices: any[] = [];
+      try {
+        devices = await Html5Qrcode.getCameras();
+      } catch (camError: any) {
+        console.error('Error getting cameras:', camError);
+        if (camError.name === 'NotAllowedError' || camError.message?.includes('permission')) {
+          throw new Error('Camera permission denied. Please allow camera access in your browser settings.');
+        }
+        throw camError;
+      }
       
-      if (devices && devices.length === 0) {
-        throw new Error('No cameras found');
+      if (!devices || devices.length === 0) {
+        throw new Error('No cameras found on this device.');
       }
 
       // Prefer back camera on mobile, fallback to first available
@@ -101,10 +121,12 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       console.error('Camera access error:', err);
       let errorMessage = 'Failed to access camera. Please try again.';
       
-      if (err.name === 'NotAllowedError' || err.message?.includes('permission')) {
-        errorMessage = 'Camera permission denied. Please allow camera access in your browser settings.';
+      if (err.name === 'NotAllowedError' || err.message?.includes('permission') || err.message?.includes('Camera permission')) {
+        errorMessage = 'Camera permission denied. Please allow camera access in your browser settings and try again.';
       } else if (err.name === 'NotFoundError' || err.message?.includes('camera') || err.message?.includes('No cameras')) {
         errorMessage = 'No camera found on this device.';
+      } else if (err.message?.includes('HTTPS')) {
+        errorMessage = err.message;
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -210,15 +232,20 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
 
         {error && (
           <div className="qr-scanner-error">
-            {error}
-            {error.includes('permission') || error.includes('camera') ? (
+            <p>{error}</p>
+            {error.includes('HTTPS') ? (
+              <div className="https-warning">
+                <p><strong>Note:</strong> Camera access requires a secure connection (HTTPS).</p>
+                <p>You can still use the manual code entry below to look up items.</p>
+              </div>
+            ) : (
               <button 
                 onClick={startScanning} 
                 className="retry-camera-btn"
               >
                 Retry Camera Access
               </button>
-            ) : null}
+            )}
           </div>
         )}
 

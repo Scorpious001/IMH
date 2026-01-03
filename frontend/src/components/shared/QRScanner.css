@@ -63,6 +63,33 @@
   align-items: center;
 }
 
+.qr-scanner-error p {
+  margin: 0;
+}
+
+.https-warning {
+  margin-top: 12px;
+  padding: 10px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  color: #856404;
+  text-align: left;
+}
+
+.https-warning p {
+  margin: 4px 0;
+  font-size: 0.9em;
+}
+
+.https-warning p:first-child {
+  margin-top: 0;
+}
+
+.https-warning p:last-child {
+  margin-bottom: 0;
+}
+
 .retry-camera-btn {
   padding: 8px 16px;
   font-size: 14px;
