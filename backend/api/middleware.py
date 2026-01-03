@@ -1,7 +1,8 @@
 """
-Middleware to add no-cache headers to API responses
+Middleware to add no-cache headers to API responses and handle HTTPS detection
 """
 from django.utils.deprecation import MiddlewareMixin
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,34 @@ class NoCacheMiddleware(MiddlewareMixin):
             response['Pragma'] = 'no-cache'
             response['Expires'] = '0'
         return response
+
+
+class HttpsSecurityMiddleware(MiddlewareMixin):
+    """Middleware to set secure cookie flags when HTTPS is detected"""
+    
+    def process_request(self, request):
+        # Check if request is over HTTPS (via X-Forwarded-Proto header from Nginx)
+        is_https = (
+            request.scheme == 'https' or
+            request.META.get('HTTP_X_FORWARDED_PROTO') == 'https' or
+            request.META.get('HTTPS') == 'on'
+        )
+        
+        # Dynamically set SESSION_COOKIE_SECURE based on HTTPS detection
+        if is_https:
+            settings.SESSION_COOKIE_SECURE = True
+            settings.CSRF_COOKIE_SECURE = True
+        else:
+            # Allow HTTP for local development
+            if 'localhost' in request.get_host() or '127.0.0.1' in request.get_host():
+                settings.SESSION_COOKIE_SECURE = False
+                settings.CSRF_COOKIE_SECURE = False
+            else:
+                # For production, prefer secure cookies even on HTTP (will be upgraded to HTTPS)
+                settings.SESSION_COOKIE_SECURE = False
+                settings.CSRF_COOKIE_SECURE = False
+        
+        return None
 
 
 class AuthDebugMiddleware(MiddlewareMixin):

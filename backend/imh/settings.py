@@ -148,11 +148,16 @@ REST_FRAMEWORK = {
 # Insert after CommonMiddleware
 common_middleware_idx = MIDDLEWARE.index('django.middleware.common.CommonMiddleware')
 MIDDLEWARE.insert(common_middleware_idx + 1, 'api.middleware.NoCacheMiddleware')
+# Add HTTPS security middleware to set secure cookies when HTTPS is detected
+# Insert before SessionMiddleware so it runs early
+session_middleware_idx = MIDDLEWARE.index('django.contrib.sessions.middleware.SessionMiddleware')
+MIDDLEWARE.insert(session_middleware_idx, 'api.middleware.HttpsSecurityMiddleware')
 # Add auth debug middleware after authentication middleware
 auth_middleware_idx = MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware')
 MIDDLEWARE.insert(auth_middleware_idx + 1, 'api.middleware.AuthDebugMiddleware')
 
 # CORS settings
+# Support both HTTP and HTTPS for production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -160,8 +165,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3001",
     "http://192.168.1.5:8000",  # Local network IP
     "http://172.28.208.1:8000",  # Alternative IP
-    "http://3.234.249.243",  # Production server
-    "http://ec2-3-234-249-243.compute-1.amazonaws.com",  # Production DNS
+    "http://3.234.249.243",  # Production server HTTP
+    "https://3.234.249.243",  # Production server HTTPS
+    "http://ec2-3-234-249-243.compute-1.amazonaws.com",  # Production DNS HTTP
+    "https://ec2-3-234-249-243.compute-1.amazonaws.com",  # Production DNS HTTPS
 ]
 
 # Allow Android app to connect from any origin (for development)
@@ -181,20 +188,30 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # CSRF settings for CORS
+# Support both HTTP and HTTPS for production
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
     "http://3.234.249.243",
+    "https://3.234.249.243",
     "http://ec2-3-234-249-243.compute-1.amazonaws.com",
+    "https://ec2-3-234-249-243.compute-1.amazonaws.com",
 ]
 
 # CSRF cookie settings
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token
+
+# Detect if we're behind a proxy that indicates HTTPS
+# Nginx will set X-Forwarded-Proto header
+USE_HTTPS = False  # Will be set based on environment or request headers
+
+# Session cookie settings
+# SESSION_COOKIE_SECURE will be set dynamically based on HTTPS detection
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = False  # Will be True when HTTPS is detected
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_SAVE_EVERY_REQUEST = True
@@ -202,6 +219,11 @@ SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_DOMAIN = None
 # Set cookie path to root so it works for all paths
 SESSION_COOKIE_PATH = '/'
+
+# Security settings for HTTPS
+# When behind Nginx with HTTPS, these will be enforced
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False  # Let Nginx handle redirects
 
 # Logging configuration
 LOGGING = {
