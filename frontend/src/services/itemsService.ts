@@ -14,7 +14,15 @@ export const itemsService = {
       params,
       withCredentials: true, // Ensure cookies are sent
     });
-    console.log('Items API response:', { status: response.status, dataLength: response.data?.results?.length || response.data?.length });
+    console.log('Items API response:', { 
+      status: response.status, 
+      data: response.data,
+      hasResults: !!response.data?.results,
+      resultsLength: response.data?.results?.length,
+      isArray: Array.isArray(response.data),
+      dataLength: response.data?.length,
+      keys: Object.keys(response.data || {})
+    });
     const data = response.data;
     
     // Handle paginated response
