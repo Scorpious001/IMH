@@ -19,6 +19,12 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
   const [manualCode, setManualCode] = useState('');
   const navigate = useNavigate();
 
+  // Check if we're on HTTPS
+  const isSecureContext = window.isSecureContext || window.location.protocol === 'https:';
+  
+  // Detect mobile device
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -42,6 +48,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       setError(null);
       setIsScanning(true);
 
+      // Check for HTTPS requirement on mobile
+      if (isMobile && !isSecureContext) {
+        throw new Error('HTTPS_REQUIRED');
+      }
+
       if (!scannerRef.current) {
         setError('Scanner container not found');
         setIsScanning(false);
@@ -59,13 +70,19 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       } catch (camError: any) {
         console.error('Error getting cameras:', camError);
         if (camError.name === 'NotAllowedError' || camError.message?.includes('permission')) {
-          throw new Error('Camera permission denied. Please allow camera access in your browser settings.');
+          throw new Error('PERMISSION_DENIED');
+        }
+        if (camError.name === 'NotFoundError' || camError.message?.includes('camera') || camError.message?.includes('No cameras')) {
+          throw new Error('NO_CAMERA');
+        }
+        if (camError.message?.includes('secure') || camError.message?.includes('HTTPS') || camError.message?.includes('getUserMedia')) {
+          throw new Error('HTTPS_REQUIRED');
         }
         throw camError;
       }
       
       if (!devices || devices.length === 0) {
-        throw new Error('No cameras found on this device.');
+        throw new Error('NO_CAMERA');
       }
 
       // Prefer back camera on mobile, fallback to first available
@@ -110,12 +127,22 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       console.error('Camera access error:', err);
       let errorMessage = 'Failed to access camera. Please try again.';
       
-      if (err.name === 'NotAllowedError' || err.message?.includes('permission') || err.message?.includes('Camera permission')) {
-        errorMessage = 'Camera permission denied. Please allow camera access in your browser settings and try again.';
-      } else if (err.name === 'NotFoundError' || err.message?.includes('camera') || err.message?.includes('No cameras')) {
+      if (err.message === 'HTTPS_REQUIRED' || (err.name === 'NotAllowedError' && !isSecureContext)) {
+        if (isMobile) {
+          errorMessage = 'Camera access requires HTTPS. Mobile browsers block camera access on HTTP connections for security.';
+        } else {
+          errorMessage = 'Camera access requires HTTPS. Please access this site using HTTPS (https://) instead of HTTP.';
+        }
+      } else if (err.name === 'NotAllowedError' || err.message === 'PERMISSION_DENIED' || err.message?.includes('permission') || err.message?.includes('Camera permission')) {
+        if (isMobile) {
+          errorMessage = 'Camera permission denied. Please allow camera access in your device settings:\n\n• iOS: Settings > Safari > Camera\n• Android: Browser settings > Site permissions > Camera';
+        } else {
+          errorMessage = 'Camera permission denied. Please allow camera access in your browser settings and try again.';
+        }
+      } else if (err.name === 'NotFoundError' || err.message === 'NO_CAMERA' || err.message?.includes('camera') || err.message?.includes('No cameras')) {
         errorMessage = 'No camera found on this device.';
       } else if (err.message?.includes('secure') || err.message?.includes('HTTPS') || err.message?.includes('getUserMedia')) {
-        errorMessage = 'Camera access may require HTTPS. Some browsers block camera access on HTTP connections. You can still use manual code entry below.';
+        errorMessage = 'Camera access may require HTTPS. Some browsers block camera access on HTTP connections.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -221,11 +248,46 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
 
         {error && (
           <div className="qr-scanner-error">
-            <p>{error}</p>
+            <p style={{ whiteSpace: 'pre-line' }}>{error}</p>
             {error.includes('HTTPS') || error.includes('secure') ? (
               <div className="https-warning">
-                <p><strong>Note:</strong> Some browsers require HTTPS for camera access.</p>
+                <p><strong>Note:</strong> Mobile browsers require HTTPS for camera access.</p>
                 <p>You can still use the manual code entry below to look up items.</p>
+                {isMobile && (
+                  <p style={{ marginTop: '8px', fontSize: '0.85em' }}>
+                    <strong>Tip:</strong> Ask your administrator to enable HTTPS on the server.
+                  </p>
+                )}
+              </div>
+            ) : error.includes('permission') || error.includes('Permission') ? (
+              <div className="https-warning">
+                <p><strong>How to enable camera access:</strong></p>
+                {isMobile ? (
+                  <>
+                    <p style={{ fontSize: '0.9em', marginTop: '8px' }}>
+                      <strong>iOS Safari:</strong> Settings → Safari → Camera → Allow
+                    </p>
+                    <p style={{ fontSize: '0.9em' }}>
+                      <strong>Android Chrome:</strong> Tap the lock icon in address bar → Permissions → Camera → Allow
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ fontSize: '0.9em', marginTop: '8px' }}>
+                    Click the camera icon in your browser's address bar and allow camera access.
+                  </p>
+                )}
+                <button 
+                  onClick={startScanning} 
+                  className="retry-camera-btn"
+                  style={{ marginTop: '12px' }}
+                >
+                  Retry Camera Access
+                </button>
+              </div>
+            ) : error.includes('No camera') ? (
+              <div className="https-warning">
+                <p>This device doesn't have a camera, or the camera is not accessible.</p>
+                <p style={{ marginTop: '8px' }}>You can still use the manual code entry below.</p>
               </div>
             ) : (
               <button 

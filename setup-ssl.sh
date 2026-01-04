@@ -40,7 +40,7 @@ if [ -z "$1" ]; then
     echo ""
     echo "No domain name provided. Using EC2 DNS name: $SERVER_DNS"
     echo "Note: Let's Encrypt requires a valid domain name. If you have a domain,"
-    echo "run: sudo bash setup-ssl.sh yourdomain.com"
+    echo "run: sudo bash setup-ssl.sh yourdomain.com [email@example.com]"
     echo ""
     read -p "Continue with DNS name? (y/n) " -n 1 -r
     echo
@@ -53,16 +53,42 @@ else
     DOMAIN="$1"
 fi
 
+# Get email from parameter or environment variable
+if [ -n "$2" ]; then
+    EMAIL="$2"
+elif [ -n "$SSL_EMAIL" ]; then
+    EMAIL="$SSL_EMAIL"
+else
+    echo ""
+    echo "Email address required for Let's Encrypt certificate registration."
+    echo "You can provide it as:"
+    echo "  1. Second parameter: sudo bash setup-ssl.sh $DOMAIN email@example.com"
+    echo "  2. Environment variable: SSL_EMAIL=email@example.com sudo bash setup-ssl.sh $DOMAIN"
+    echo ""
+    read -p "Enter email address: " EMAIL
+    if [ -z "$EMAIL" ]; then
+        echo "Error: Email address is required."
+        exit 1
+    fi
+fi
+
+# Validate email format (basic check)
+if [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+    echo "Warning: Email format may be invalid: $EMAIL"
+    read -p "Continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
 echo ""
 echo "Obtaining SSL certificate for: $DOMAIN"
+echo "Using email: $EMAIL"
 echo "This will automatically configure Nginx for HTTPS..."
 
 # Run Certbot to get certificate and configure Nginx
-certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email admin@example.com --redirect
-
-# Note: The email above is a placeholder. Certbot will prompt for a real email.
-# For non-interactive mode, you should provide a real email:
-# certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email your-email@example.com --redirect
+certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --email "$EMAIL" --redirect
 
 echo ""
 echo "=== SSL Setup Complete ==="
