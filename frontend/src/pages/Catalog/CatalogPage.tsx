@@ -67,8 +67,18 @@ const CatalogPage: React.FC = () => {
         params.search = searchTerm;
       }
       const data = await itemsService.getAll(params);
-      console.log('Items loaded:', data.length, 'items');
-      console.log('First few items:', data.slice(0, 3));
+      console.log('📋 CatalogPage: Items loaded:', data.length, 'items');
+      console.log('📋 CatalogPage: First few items:', data.slice(0, 3));
+      console.log('📋 CatalogPage: All items:', data);
+      
+      if (data.length === 0) {
+        console.warn('📋 CatalogPage: No items returned from API. This could mean:');
+        console.warn('  1. No items exist in the database (run seed data)');
+        console.warn('  2. User does not have permission to view items');
+        console.warn('  3. Filters are too restrictive');
+        console.warn('  4. API returned empty results');
+      }
+      
       setItems(data);
       // Clear any previous errors on success
       setError(null);
