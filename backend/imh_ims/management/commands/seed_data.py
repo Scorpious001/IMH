@@ -394,11 +394,18 @@ class Command(BaseCommand):
             items.append(item)
             existing_codes.add(code)
         
-        # Generate additional random items
-        additional_count = 50
-        units = ['ea', 'case', 'roll', 'liter', 'box', 'pack', 'bottle', 'can', 'gallon', 'pound']
+        # Generate additional random items to reach ~400 total
+        current_count = len(items)
+        target_count = 400
+        additional_count = max(0, target_count - current_count)
+        units = ['ea', 'case', 'roll', 'liter', 'box', 'pack', 'bottle', 'can', 'gallon', 'pound', 'oz', 'sheet', 'pair', 'set', 'dozen']
         
-        for i in range(additional_count):
+        self.stdout.write(f'  Generating {additional_count} additional items to reach ~400 total...')
+        
+        batch_size = 100
+        for i in range(0, additional_count, batch_size):
+            batch = []
+            for j in range(i, min(i + batch_size, additional_count)):
             code = f'ITEM-{randint(1000, 9999)}'
             while code in existing_codes:
                 code = f'ITEM-{randint(1000, 9999)}'
@@ -407,17 +414,22 @@ class Command(BaseCommand):
             category = choice(categories) if categories else None
             vendor = choice(vendors) if vendors else None
             
-            item = Item.objects.create(
-                name=fake.catch_phrase() + ' ' + fake.word().capitalize(),
-                short_code=code,
-                category=category,
-                default_vendor=vendor,
-                unit_of_measure=choice(units),
-                cost=Decimal(str(round(uniform(1.00, 200.00), 2))),
-                lead_time_days=randint(1, 21),
-                is_active=True
-            )
-            items.append(item)
+                item = Item(
+                    name=fake.catch_phrase() + ' ' + fake.word().capitalize(),
+                    short_code=code,
+                    category=category,
+                    default_vendor=vendor,
+                    unit_of_measure=choice(units),
+                    cost=Decimal(str(round(uniform(1.00, 200.00), 2))),
+                    lead_time_days=randint(1, 21),
+                    is_active=True
+                )
+                batch.append(item)
+                existing_codes.add(code)
+            
+            Item.objects.bulk_create(batch)
+            items.extend(batch)
+            self.stdout.write(f'  Created {len(items)}/{target_count} items...', ending='\r')
         
         self.stdout.write(self.style.SUCCESS(f'  [OK] Created {len(items)} items'))
         return items
@@ -432,9 +444,11 @@ class Command(BaseCommand):
         other_locations = Location.objects.exclude(type='STOREROOM')
         
         batch = []
-        for item in items:
+        total_items = len(items)
+        for idx, item in enumerate(items):
             # Each item should have stock in at least one main storeroom
-            for storeroom in main_storerooms[:2]:  # First 2 storerooms
+            storeroom_count = 2 if idx < total_items * 0.8 else 1  # Most items in 2 storerooms, some in 1
+            for storeroom in main_storerooms[:storeroom_count]:
                 on_hand = Decimal(str(round(uniform(50, 500), 2)))
                 par = Decimal(str(round(uniform(30, 200), 2)))
                 reserved = Decimal(str(round(uniform(0, float(on_hand) * 0.2), 2)))
@@ -451,11 +465,16 @@ class Command(BaseCommand):
                 batch.append(stock)
             
             # Some items in other locations (lower quantities, some below par)
-            for location in sample(list(other_locations), min(randint(2, 5), len(other_locations))):
+            # More locations for more items to create better distribution
+            location_count = randint(2, 8) if idx < total_items * 0.7 else randint(1, 4)
+            for location in sample(list(other_locations), min(location_count, len(other_locations))):
                 # 30% chance of being below par for alerts
                 if uniform(0, 1) < 0.3:
                     par = Decimal(str(round(uniform(10, 50), 2)))
                     on_hand = Decimal(str(round(uniform(1, float(par) * 0.8), 2)))  # Below par
+                elif uniform(0, 1) < 0.2:  # 20% at risk (80-100% of par)
+                    par = Decimal(str(round(uniform(10, 50), 2)))
+                    on_hand = Decimal(str(round(uniform(float(par) * 0.8, float(par) * 0.99), 2)))  # At risk
                 else:
                     par = Decimal(str(round(uniform(5, 30), 2)))
                     on_hand = Decimal(str(round(uniform(float(par) * 0.8, float(par) * 1.5), 2)))
@@ -473,10 +492,13 @@ class Command(BaseCommand):
                 )
                 batch.append(stock)
             
-            if len(batch) >= 100:
+            if len(batch) >= 200:
                 StockLevel.objects.bulk_create(batch)
                 stock_levels.extend(batch)
                 batch = []
+            
+            if (idx + 1) % 50 == 0:
+                self.stdout.write(f'  Created stock for {idx + 1}/{total_items} items...', ending='\r')
         
         if batch:
             StockLevel.objects.bulk_create(batch)
@@ -493,8 +515,11 @@ class Command(BaseCommand):
         # Get stock levels to create realistic transactions
         stock_levels = list(StockLevel.objects.all())
         
+        # Scale transactions based on number of items (more items = more transactions)
+        transaction_count = min(2000, len(items) * 5)  # ~5 transactions per item, max 2000
+        
         batch = []
-        for i in range(500):  # 500 transactions over the past year
+        for i in range(transaction_count):
             # 60% issues, 25% receives, 10% transfers, 5% adjusts
             trans_type = fake.random.choices(
                 ['ISSUE', 'RECEIVE', 'TRANSFER', 'ADJUST'],
@@ -550,10 +575,13 @@ class Command(BaseCommand):
             )
             batch.append(trans)
             
-            if len(batch) >= 100:
+            if len(batch) >= 200:
                 InventoryTransaction.objects.bulk_create(batch)
                 transactions.extend(batch)
                 batch = []
+            
+            if (i + 1) % 200 == 0:
+                self.stdout.write(f'  Created {len(transactions)}/{transaction_count} transactions...', ending='\r')
         
         if batch:
             InventoryTransaction.objects.bulk_create(batch)
@@ -570,7 +598,10 @@ class Command(BaseCommand):
         statuses = ['PENDING', 'PICKED', 'COMPLETED', 'CANCELLED']
         status_weights = [0.2, 0.2, 0.5, 0.1]
         
-        for i in range(100):
+        # Scale requisitions based on items
+        requisition_count = min(300, len(items) * 0.75)  # ~0.75 requisitions per item, max 300
+        
+        for i in range(int(requisition_count)):
             from_loc = choice(locations)
             to_loc = choice([loc for loc in locations if loc != from_loc])
             status = fake.random.choices(statuses, weights=status_weights)[0]
@@ -619,7 +650,10 @@ class Command(BaseCommand):
         statuses = ['IN_PROGRESS', 'COMPLETED', 'APPROVED', 'CANCELLED']
         status_weights = [0.1, 0.2, 0.6, 0.1]
         
-        for i in range(50):
+        # Scale count sessions based on items
+        count_session_count = min(150, len(items) * 0.375)  # ~0.375 sessions per item, max 150
+        
+        for i in range(int(count_session_count)):
             location = choice(locations)
             counted_by = choice(users)
             status = fake.random.choices(statuses, weights=status_weights)[0]
@@ -684,7 +718,10 @@ class Command(BaseCommand):
         statuses = ['DRAFT', 'SUBMITTED', 'APPROVED', 'ORDERED', 'RECEIVED', 'CANCELLED']
         status_weights = [0.15, 0.15, 0.2, 0.15, 0.3, 0.05]
         
-        for i in range(75):
+        # Scale purchase requests based on items
+        purchase_request_count = min(200, len(items) * 0.5)  # ~0.5 requests per item, max 200
+        
+        for i in range(int(purchase_request_count)):
             vendor = choice(vendors)
             status = fake.random.choices(statuses, weights=status_weights)[0]
             
