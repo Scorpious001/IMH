@@ -33,11 +33,20 @@ export const itemsService = {
       
       // Log the actual data structure
       if (response.data?.results) {
+        console.log('📦 Results array length:', response.data.results.length);
+        console.log('📦 Results array:', response.data.results);
         console.log('📦 First result item:', response.data.results[0]);
+        console.log('📦 Pagination info:', {
+          count: response.data.count,
+          next: response.data.next,
+          previous: response.data.previous,
+          page: response.data.page || 'N/A'
+        });
       } else if (Array.isArray(response.data)) {
+        console.log('📦 Array response length:', response.data.length);
         console.log('📦 First array item:', response.data[0]);
       } else {
-        console.log('📦 Response data structure:', JSON.stringify(response.data, null, 2).substring(0, 500));
+        console.log('📦 Full response data:', JSON.stringify(response.data, null, 2));
       }
       
       const data = response.data;

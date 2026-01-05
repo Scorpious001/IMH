@@ -105,18 +105,34 @@ class ItemViewSet(viewsets.ModelViewSet):
         # Set action for get_queryset
         self.action = 'list'
         
-        queryset = self.filter_queryset(self.get_queryset())
-        logger.info(f'List queryset count: {queryset.count()}, user: {request.user.username}')
+        # Get queryset
+        queryset = self.get_queryset()
+        logger.info(f'[ITEMS API] get_queryset count: {queryset.count()}, user: {request.user.username}')
         
+        # Apply filters
+        queryset = self.filter_queryset(queryset)
+        logger.info(f'[ITEMS API] After filter_queryset count: {queryset.count()}')
+        
+        # Check permissions
+        logger.info(f'[ITEMS API] User permissions check - is_superuser: {request.user.is_superuser}')
+        try:
+            if hasattr(request.user, 'profile'):
+                logger.info(f'[ITEMS API] User profile role: {request.user.profile.role}, is_admin: {request.user.profile.is_admin}')
+        except:
+            logger.warning(f'[ITEMS API] User has no profile')
+        
+        # Paginate
         page = self.paginate_queryset(queryset)
         if page is not None:
+            logger.info(f'[ITEMS API] Paginated - page items count: {len(page)}')
             serializer = self.get_serializer(page, many=True)
+            logger.info(f'[ITEMS API] Serialized items count: {len(serializer.data)}')
             response = self.get_paginated_response(serializer.data)
-            logger.info(f'Paginated response: count={len(serializer.data)}, total={response.data.get("count", 0)}')
+            logger.info(f'[ITEMS API] Response data count: {response.data.get("count", 0)}, results length: {len(response.data.get("results", []))}')
             return response
         
         serializer = self.get_serializer(queryset, many=True)
-        logger.info(f'Non-paginated response: count={len(serializer.data)}')
+        logger.info(f'[ITEMS API] Non-paginated response: count={len(serializer.data)}')
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
