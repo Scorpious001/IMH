@@ -83,10 +83,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             logger.info(f'After below_par filter: {queryset.count()}, item_ids count: {len(item_ids)}')
         
         if critical == 'true':
-            # Items that are below par and have low stock
+            # Items that are below par and have low stock (below par AND less than 10 units)
             item_ids = StockLevel.objects.filter(
-                on_hand_qty__lt=F('par'),
-                on_hand_qty__lt=10,
+                Q(on_hand_qty__lt=F('par')) & Q(on_hand_qty__lt=10),
                 par__gt=0
             ).values_list('item_id', flat=True).distinct()
             queryset = queryset.filter(id__in=item_ids)
