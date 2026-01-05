@@ -230,8 +230,14 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
   };
 
   return (
-    <div className="qr-scanner-overlay">
-      <div className="qr-scanner-container">
+    <div className="qr-scanner-overlay" onClick={(e) => {
+      // Close on overlay click (but not on container click)
+      if (e.target === e.currentTarget) {
+        stopScanning();
+        onClose?.();
+      }
+    }}>
+      <div className="qr-scanner-container" onClick={(e) => e.stopPropagation()}>
         <div className="qr-scanner-header">
           <h2>Scan QR Code</h2>
           <button 
@@ -241,6 +247,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
             }} 
             className="close-scanner-btn"
             aria-label="Close scanner"
+            type="button"
           >
             ×
           </button>
