@@ -102,16 +102,25 @@ const ParLevelStatusChart: React.FC = () => {
     return <div className="par-status-empty">No par level data available</div>;
   }
 
+  // Ensure we have valid data
+  const belowParCount = chartData.belowParCount || 0;
+  const atRiskCount = chartData.atRiskCount || 0;
+  const totalItems = chartData.totalItems || 0;
+  const locationGroups = chartData.locationGroups || {};
+
+  // Ensure we have valid numbers for calculations
+  const safeBelowPar = Number(belowParCount) || 0;
+  const safeAtRisk = Number(atRiskCount) || 0;
+  const safeTotal = Number(totalItems) || 0;
+  const okCount = Math.max(0, safeTotal - safeBelowPar - safeAtRisk);
+
   // Pie chart data for overall status
+  
   const pieData = {
     labels: ['Below Par', 'At Risk', 'OK'],
     datasets: [
       {
-        data: [
-          chartData.belowParCount,
-          chartData.atRiskCount,
-          Math.max(0, chartData.totalItems - chartData.belowParCount - chartData.atRiskCount),
-        ],
+        data: [safeBelowPar, safeAtRisk, okCount],
         backgroundColor: [
           'rgba(220, 53, 69, 0.8)',
           'rgba(255, 193, 7, 0.8)',
@@ -128,18 +137,18 @@ const ParLevelStatusChart: React.FC = () => {
   };
 
   // Bar chart data for locations
-  const locations = Object.keys(chartData.locationGroups);
+  const locations = Object.keys(locationGroups);
   const barData = {
     labels: locations.length > 0 ? locations : ['No Data'],
     datasets: [
       {
         label: 'Below Par',
-        data: locations.map((loc) => chartData.locationGroups[loc].below),
+        data: locations.length > 0 ? locations.map((loc) => (locationGroups[loc]?.below || 0)) : [0],
         backgroundColor: 'rgba(220, 53, 69, 0.6)',
       },
       {
         label: 'At Risk',
-        data: locations.map((loc) => chartData.locationGroups[loc].atRisk),
+        data: locations.length > 0 ? locations.map((loc) => (locationGroups[loc]?.atRisk || 0)) : [0],
         backgroundColor: 'rgba(255, 193, 7, 0.6)',
       },
     ],
@@ -152,36 +161,46 @@ const ParLevelStatusChart: React.FC = () => {
       <div className="par-status-summary">
         <div className="summary-card critical">
           <div className="summary-label">Below Par</div>
-          <div className="summary-value">{chartData.belowParCount}</div>
+          <div className="summary-value">{belowParCount}</div>
           {chartData.avgDeficit > 0 && (
             <div className="summary-detail">Avg Deficit: {chartData.avgDeficit.toFixed(1)}</div>
           )}
         </div>
         <div className="summary-card warning">
           <div className="summary-label">At Risk</div>
-          <div className="summary-value">{chartData.atRiskCount}</div>
+          <div className="summary-value">{atRiskCount}</div>
         </div>
         <div className="summary-card success">
           <div className="summary-label">Total Items</div>
-          <div className="summary-value">{chartData.totalItems}</div>
+          <div className="summary-value">{totalItems}</div>
         </div>
       </div>
 
       <div className="par-charts-grid">
         <div className="chart-container">
           <h4>Status Distribution</h4>
-          <Chart type="doughnut" data={pieData} options={{
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                position: 'bottom' as const,
-              },
-              title: {
-                display: false,
-              },
-            },
-          }} />
+          {safeTotal > 0 ? (
+            <Chart 
+              type="doughnut" 
+              data={pieData} 
+              options={{
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    position: 'bottom' as const,
+                  },
+                  title: {
+                    display: false,
+                  },
+                },
+              }} 
+            />
+          ) : (
+            <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+              No data to display
+            </div>
+          )}
         </div>
 
         {locations.length > 0 && (

@@ -5,19 +5,34 @@ import UsageTrendsSection from '../../components/report/UsageTrendsSection';
 import GeneralUsageChart from '../../components/report/GeneralUsageChart';
 import LowParUsageChart from '../../components/report/LowParUsageChart';
 import ParLevelStatusChart from '../../components/report/ParLevelStatusChart';
+import ErrorBoundary from '../../components/shared/ErrorBoundary';
 import './ReportsPage.css';
 
 const ReportsPage: React.FC = () => {
   return (
-    <div className="reports-page">
-      <h1>Reports & Alerts</h1>
-      <ParLevelStatusChart />
-      <AlertsSection />
-      <GeneralUsageChart />
-      <LowParUsageChart />
-      <SuggestedOrdersSection />
-      <UsageTrendsSection />
-    </div>
+    <ErrorBoundary>
+      <div className="reports-page">
+        <h1>Reports & Alerts</h1>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Par Level Status</div>}>
+          <ParLevelStatusChart />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Alerts</div>}>
+          <AlertsSection />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading General Usage Chart</div>}>
+          <GeneralUsageChart />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Low Par Trends</div>}>
+          <LowParUsageChart />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Suggested Orders</div>}>
+          <SuggestedOrdersSection />
+        </ErrorBoundary>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Usage Trends</div>}>
+          <UsageTrendsSection />
+        </ErrorBoundary>
+      </div>
+    </ErrorBoundary>
   );
 };
 
