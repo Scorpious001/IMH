@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { itemsService } from '../../services/itemsService';
 import { useNavigate } from 'react-router-dom';
@@ -229,7 +230,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
     }
   };
 
-  return (
+  const scannerContent = (
     <div className="qr-scanner-overlay" onClick={(e) => {
       // Close on overlay click (but not on container click)
       if (e.target === e.currentTarget) {
@@ -356,6 +357,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       </div>
     </div>
   );
+
+  // Use React Portal to render outside of any parent container
+  return createPortal(scannerContent, document.body);
 };
 
 export default QRScanner;
