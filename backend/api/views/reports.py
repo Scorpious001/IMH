@@ -148,7 +148,12 @@ class GeneralUsageView(APIView):
             # Format period as YYYY-MM string
             usage_by_period = []
             for entry in transactions:
-                period_str = entry['period'].strftime('%Y-%m')
+                # Handle both datetime and date objects
+                period_value = entry['period']
+                if hasattr(period_value, 'strftime'):
+                    period_str = period_value.strftime('%Y-%m')
+                else:
+                    period_str = str(period_value)[:7]  # Take first 7 chars (YYYY-MM)
                 usage_by_period.append({
                     'period': period_str,
                     'total_qty': float(entry['total_qty'] or 0),
