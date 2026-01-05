@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { itemsService } from '../../services/itemsService';
 import { ImportPreviewResponse, ImportResult } from '../../types/item.types';
 import './ImportItemsTab.css';
 
 const ImportItemsTab: React.FC = () => {
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -12,6 +14,24 @@ const ImportItemsTab: React.FC = () => {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [showColumnMapping, setShowColumnMapping] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Check admin access
+  const isAdmin = user?.role === 'ADMIN' || user?.is_superuser === true;
+  
+  // Show message if not admin
+  if (!isAdmin) {
+    return (
+      <div className="import-items-tab">
+        <div className="settings-section">
+          <div className="error-message">
+            <strong>Admin Access Required</strong>
+            <p>You must be an administrator to import items. Please contact your system administrator to grant you admin access.</p>
+            <p>Current user: {user?.username} | Role: {user?.role || 'N/A'} | Superuser: {user?.is_superuser ? 'Yes' : 'No'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // System column names that can be mapped
   const systemColumns = [

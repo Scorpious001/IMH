@@ -9,13 +9,21 @@ type TabType = 'preferences' | 'appearance' | 'import-items';
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
+  // Check both role and is_superuser for admin access
+  const isAdmin = user?.role === 'ADMIN' || user?.is_superuser === true;
   const [activeTab, setActiveTab] = useState<TabType>('preferences');
 
+  // Debug logging
+  console.log('SettingsPage - User:', user);
+  console.log('SettingsPage - User role:', user?.role);
+  console.log('SettingsPage - Is superuser:', user?.is_superuser);
+  console.log('SettingsPage - Is admin:', isAdmin);
+
+  // Always show Import Items tab - it will show an access message if not admin
   const tabs = [
     { id: 'preferences' as TabType, label: 'Preferences' },
     { id: 'appearance' as TabType, label: 'Appearance' },
-    ...(isAdmin ? [{ id: 'import-items' as TabType, label: 'Import Items' }] : []),
+    { id: 'import-items' as TabType, label: 'Import Items' },
   ];
 
   return (
@@ -37,7 +45,7 @@ const SettingsPage: React.FC = () => {
       <div className="settings-content">
         {activeTab === 'preferences' && <PreferencesTab />}
         {activeTab === 'appearance' && <AppearanceTab />}
-        {activeTab === 'import-items' && isAdmin && <ImportItemsTab />}
+        {activeTab === 'import-items' && <ImportItemsTab />}
       </div>
     </div>
   );
