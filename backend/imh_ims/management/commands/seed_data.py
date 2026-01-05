@@ -133,7 +133,7 @@ class Command(BaseCommand):
             manager.set_password('manager123')
             manager.save()
             profile, _ = UserProfile.objects.get_or_create(user=manager)
-            profile.is_admin = True
+            profile.role = 'ADMIN'
             profile.save()
         users.append(manager)
         
@@ -406,14 +406,14 @@ class Command(BaseCommand):
         for i in range(0, additional_count, batch_size):
             batch = []
             for j in range(i, min(i + batch_size, additional_count)):
-            code = f'ITEM-{randint(1000, 9999)}'
-            while code in existing_codes:
                 code = f'ITEM-{randint(1000, 9999)}'
-            existing_codes.add(code)
-            
-            category = choice(categories) if categories else None
-            vendor = choice(vendors) if vendors else None
-            
+                while code in existing_codes:
+                    code = f'ITEM-{randint(1000, 9999)}'
+                existing_codes.add(code)
+                
+                category = choice(categories) if categories else None
+                vendor = choice(vendors) if vendors else None
+                
                 item = Item(
                     name=fake.catch_phrase() + ' ' + fake.word().capitalize(),
                     short_code=code,
@@ -425,7 +425,6 @@ class Command(BaseCommand):
                     is_active=True
                 )
                 batch.append(item)
-                existing_codes.add(code)
             
             Item.objects.bulk_create(batch)
             items.extend(batch)
