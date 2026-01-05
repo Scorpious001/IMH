@@ -79,6 +79,12 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.chart-empty-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #999);
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .chart-summary {
     flex-direction: column;

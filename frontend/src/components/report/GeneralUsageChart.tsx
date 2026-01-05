@@ -54,8 +54,17 @@ const GeneralUsageChart: React.FC<GeneralUsageChartProps> = ({ period = 'year' }
     return <div className="chart-loading">Loading usage data...</div>;
   }
 
-  if (!usageData || !usageData.usage_by_period || usageData.usage_by_period.length === 0) {
+  if (!usageData) {
     return <div className="chart-empty">No usage data available</div>;
+  }
+
+  if (!usageData.usage_by_period || usageData.usage_by_period.length === 0) {
+    return (
+      <div className="chart-empty">
+        <p>No usage data available for the selected period</p>
+        <p className="chart-empty-hint">Usage data will appear here once items are issued from inventory.</p>
+      </div>
+    );
   }
 
   const chartData = {
@@ -64,8 +73,15 @@ const GeneralUsageChart: React.FC<GeneralUsageChartProps> = ({ period = 'year' }
         return `Q${entry.quarter} ${entry.year}`;
       } else {
         // For year or month, use period field (e.g., "2024-01")
-        const date = new Date(entry.period + '-01');
-        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        try {
+          const date = new Date(entry.period + '-01');
+          if (isNaN(date.getTime())) {
+            return entry.period || 'Unknown';
+          }
+          return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        } catch (e) {
+          return entry.period || 'Unknown';
+        }
       }
     }),
     datasets: [

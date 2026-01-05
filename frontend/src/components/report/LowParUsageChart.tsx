@@ -49,14 +49,37 @@ const LowParUsageChart: React.FC = () => {
     return <div className="chart-loading">Loading low par trends...</div>;
   }
 
-  if (!chartData || !chartData.trends || chartData.trends.length === 0) {
+  if (!chartData) {
     return <div className="chart-empty">No low par trend data available</div>;
+  }
+
+  if (!chartData.trends || chartData.trends.length === 0) {
+    return (
+      <div className="chart-empty">
+        <p>No low par trend data available</p>
+        <p className="chart-empty-hint">Trend data will appear here once par levels are set and items are tracked.</p>
+      </div>
+    );
   }
 
   const data = {
     labels: chartData.trends.map((entry: any) => {
-      const date = new Date(entry.period);
-      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      try {
+        // Handle both "YYYY-MM" format and full date strings
+        let dateStr = entry.period;
+        if (dateStr && !dateStr.includes('-')) {
+          dateStr = dateStr + '-01';
+        } else if (dateStr && dateStr.match(/^\d{4}-\d{2}$/)) {
+          dateStr = dateStr + '-01';
+        }
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+          return entry.period || 'Unknown';
+        }
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      } catch (e) {
+        return entry.period || 'Unknown';
+      }
     }),
     datasets: [
       {

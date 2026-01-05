@@ -38,9 +38,23 @@ const ParLevelStatusChart: React.FC = () => {
       setLoading(true);
       const alerts = await reportsService.getAlerts();
       
-      // Calculate statistics
-      const belowPar = alerts.below_par || [];
-      const atRisk = alerts.at_risk || [];
+      // Transform and calculate statistics
+      const belowPar = (alerts.below_par || []).map((stockLevel: any) => ({
+        item_id: Number(stockLevel.item) || 0,
+        location_id: Number(stockLevel.location) || 0,
+        location_name: stockLevel.location_name || 'Unknown Location',
+        par: Number(stockLevel.par) || 0,
+        on_hand_qty: Number(stockLevel.on_hand_qty) || 0,
+      }));
+      
+      const atRisk = (alerts.at_risk || []).map((stockLevel: any) => ({
+        item_id: Number(stockLevel.item) || 0,
+        location_id: Number(stockLevel.location) || 0,
+        location_name: stockLevel.location_name || 'Unknown Location',
+        par: Number(stockLevel.par) || 0,
+        on_hand_qty: Number(stockLevel.on_hand_qty) || 0,
+      }));
+      
       const totalItems = belowPar.length + atRisk.length;
       
       // Calculate average deficit for below par items
@@ -72,8 +86,9 @@ const ParLevelStatusChart: React.FC = () => {
         avgDeficit,
         locationGroups,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading par status data:', error);
+      setChartData(null);
     } finally {
       setLoading(false);
     }

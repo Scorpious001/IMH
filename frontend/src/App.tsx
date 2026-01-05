@@ -138,7 +138,11 @@ const AppRoutes: React.FC = () => {
       />
       <Route
         path="/download"
-        element={<DownloadPage />}
+        element={
+          <MobileLayout>
+            <DownloadPage />
+          </MobileLayout>
+        }
       />
     </Routes>
   );

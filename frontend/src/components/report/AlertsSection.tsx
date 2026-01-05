@@ -18,43 +18,33 @@ const AlertsSection: React.FC = () => {
       setLoading(true);
       const data = await reportsService.getAlerts();
       
-      console.log('DEBUG AlertsSection: Raw data from API:', data);
-      console.log('DEBUG AlertsSection: below_par count:', data.below_par_count);
-      console.log('DEBUG AlertsSection: below_par array length:', data.below_par?.length);
-      
       // Transform the data to match the expected structure
-      // Backend returns StockLevel objects with 'item' and 'location' fields
+      // Backend returns StockLevel objects with 'item' (ID) and 'location' (ID) fields
       // Frontend expects 'item_id' and 'location_id'
       const transformedData: Alert = {
-        below_par: (data.below_par || []).map((stockLevel: any) => {
-          console.log('DEBUG AlertsSection: Processing below_par item:', stockLevel);
-          return {
-            item_id: stockLevel.item,
-            item_name: stockLevel.item_name,
-            item_short_code: stockLevel.item_short_code,
-            location_id: stockLevel.location,
-            location_name: stockLevel.location_name,
-            on_hand_qty: Number(stockLevel.on_hand_qty),
-            par: Number(stockLevel.par || 0),
-            stock_level: stockLevel,
-          };
-        }),
-        at_risk: (data.at_risk || []).map((stockLevel: any) => ({
-          item_id: stockLevel.item,
-          item_name: stockLevel.item_name,
-          item_short_code: stockLevel.item_short_code,
-          location_id: stockLevel.location,
-          location_name: stockLevel.location_name,
-          on_hand_qty: Number(stockLevel.on_hand_qty),
-          par: Number(stockLevel.par || 0),
+        below_par: (data.below_par || []).map((stockLevel: any) => ({
+          item_id: Number(stockLevel.item) || 0,
+          item_name: stockLevel.item_name || 'Unknown Item',
+          item_short_code: stockLevel.item_short_code || '',
+          location_id: Number(stockLevel.location) || 0,
+          location_name: stockLevel.location_name || 'Unknown Location',
+          on_hand_qty: Number(stockLevel.on_hand_qty) || 0,
+          par: Number(stockLevel.par) || 0,
           stock_level: stockLevel,
         })),
-        below_par_count: data.below_par_count || 0,
-        at_risk_count: data.at_risk_count || 0,
+        at_risk: (data.at_risk || []).map((stockLevel: any) => ({
+          item_id: Number(stockLevel.item) || 0,
+          item_name: stockLevel.item_name || 'Unknown Item',
+          item_short_code: stockLevel.item_short_code || '',
+          location_id: Number(stockLevel.location) || 0,
+          location_name: stockLevel.location_name || 'Unknown Location',
+          on_hand_qty: Number(stockLevel.on_hand_qty) || 0,
+          par: Number(stockLevel.par) || 0,
+          stock_level: stockLevel,
+        })),
+        below_par_count: Number(data.below_par_count) || 0,
+        at_risk_count: Number(data.at_risk_count) || 0,
       };
-      
-      console.log('DEBUG AlertsSection: Transformed data:', transformedData);
-      console.log('DEBUG AlertsSection: Transformed below_par count:', transformedData.below_par.length);
       
       setAlerts(transformedData);
     } catch (error: any) {

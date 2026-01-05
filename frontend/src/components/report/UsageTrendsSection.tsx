@@ -72,8 +72,9 @@ const UsageTrendsSection: React.FC = () => {
       setLoading(true);
       const data = await itemsService.getUsage(selectedItemId, days);
       setUsageData(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading usage trends:', error);
+      setUsageData(null);
     } finally {
       setLoading(false);
     }
@@ -235,6 +236,15 @@ const UsageTrendsSection: React.FC = () => {
       {!selectedItemId && !loading && (
         <div className="trends-placeholder">
           <p>Select an item to view usage trends</p>
+        </div>
+      )}
+
+      {selectedItemId && !usageData && !loading && (
+        <div className="trends-error">
+          <p>Unable to load usage data for this item</p>
+          <button className="btn-retry" onClick={loadUsageTrend}>
+            Retry
+          </button>
         </div>
       )}
     </div>

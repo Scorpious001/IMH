@@ -38,12 +38,18 @@ const SuggestedOrdersSection: React.FC = () => {
       // Transform the data to match the expected structure
       const transformedSuggestions = (data.suggestions || []).map((suggestion: any) => ({
         ...suggestion,
-        current_stock: suggestion.current_on_hand || suggestion.current_stock,
-        par: suggestion.par || 0,
+        current_stock: Number(suggestion.current_on_hand || suggestion.current_stock || 0),
+        par: Number(suggestion.par || 0),
+        suggested_qty: Number(suggestion.suggested_order_qty || suggestion.suggested_qty || 0),
+        avg_daily_usage: Number(suggestion.avg_daily_usage || 0),
+        lead_time_days: Number(suggestion.lead_time_days || 0),
+        projected_on_hand: Number(suggestion.projected_on_hand || 0),
+        days_until_below_par: Number(suggestion.days_until_below_par || 0),
       }));
       setSuggestions(transformedSuggestions);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading suggested orders:', error);
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }

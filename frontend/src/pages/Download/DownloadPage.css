@@ -1,10 +1,11 @@
 .download-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 64px); /* Account for TopNav height */
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  padding-top: 80px; /* Account for TopNav */
 }
 
 .download-container {
