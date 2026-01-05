@@ -1,10 +1,11 @@
 .item-table-container {
   width: 100%;
   overflow-x: auto;
-  background: var(--bg-primary, white);
-  border-radius: 8px;
-  border: 1px solid var(--border-color, #ddd);
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border-color);
+  transition: all var(--transition-slow);
+  box-shadow: 0 1px 3px 0 var(--shadow), 0 1px 2px -1px var(--shadow);
 }
 
 .item-table {
@@ -13,17 +14,20 @@
 }
 
 .item-table thead {
-  background: var(--bg-secondary, #f9f9f9);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 .item-table th {
-  padding: 0.75rem;
+  padding: 1rem;
   text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text-primary, #333);
-  border-bottom: 2px solid var(--border-color, #ddd);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
 }
 
 .item-table th.sortable {
@@ -45,12 +49,14 @@
 
 .item-table tbody tr {
   cursor: pointer;
-  border-bottom: 1px solid var(--border-color, #f0f0f0);
-  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--border-color-light);
+  transition: all var(--transition-base);
 }
 
 .item-table tbody tr:hover {
-  background: var(--bg-secondary, #f9f9f9);
+  background: var(--bg-hover);
+  transform: scale(1.01);
+  box-shadow: 0 2px 4px var(--shadow);
 }
 
 .item-table td {
@@ -74,18 +80,21 @@
 }
 
 .view-button {
-  padding: 0.25rem 0.75rem;
-  background: var(--primary-color, #007bff);
-  color: var(--primary-text, white);
+  padding: 0.5rem 1rem;
+  background: var(--gradient-primary);
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-base);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .view-button:hover {
-  background: var(--primary-color-dark, #0056b3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
 .table-empty {
