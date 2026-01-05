@@ -62,23 +62,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log('AuthContext: Starting login for:', username);
+      
       const response = await authService.login(username, password);
+      console.log('AuthContext: Login response received:', response);
+      
       // The login response has { user: {...}, message: '...', token: '...' }
-      const userData = response.user || response;
+      const userData = response?.user || response;
+      console.log('AuthContext: Extracted user data:', userData);
+      
       // Ensure we have the user object with all fields
-      if (userData && (userData.role || userData.is_superuser)) {
+      if (userData && (userData.role || userData.is_superuser || userData.id)) {
+        console.log('AuthContext: Setting user data');
         setUser(userData);
         setIsLoading(false);
       } else {
+        console.log('AuthContext: User data incomplete, fetching from server');
         // If user data is incomplete, fetch it
         await checkAuth();
       }
     } catch (error: any) {
+      console.error('AuthContext: Login error:', error);
       setIsLoading(false);
       // Better error handling
-      const errorMessage = error.response?.data?.error || 
-                          error.message || 
+      const errorMessage = error?.message || 
+                          error?.response?.data?.error || 
                           'Login failed. Please check your credentials.';
+      console.error('AuthContext: Throwing error:', errorMessage);
       throw new Error(errorMessage);
     }
   };

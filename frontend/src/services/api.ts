@@ -51,11 +51,21 @@ let csrfToken: string | null = null;
 export const getCSRFToken = async (): Promise<string | null> => {
   try {
     // Use the api instance to ensure cookies are sent
+    console.log('Fetching CSRF token from:', `${getApiUrl()}/auth/csrf/`);
     const response = await api.get('/auth/csrf/');
-    csrfToken = response.data.csrfToken;
+    csrfToken = response.data?.csrfToken || response.data?.csrf;
+    console.log('CSRF token retrieved:', csrfToken ? 'Yes' : 'No');
+    if (!csrfToken) {
+      console.warn('CSRF token not found in response:', response.data);
+    }
     return csrfToken;
-  } catch (error) {
-    console.error('Failed to get CSRF token:', error);
+  } catch (error: any) {
+    console.error('Failed to get CSRF token:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    csrfToken = null;
     return null;
   }
 };
@@ -121,17 +131,71 @@ api.interceptors.response.use(
 // Authentication helper functions
 export const authService = {
   login: async (username: string, password: string) => {
-    // Ensure we have a CSRF token before login
-    if (!csrfToken) {
+    try {
+      // Ensure we have a CSRF token before login
+      if (!csrfToken) {
+        console.log('Fetching CSRF token before login...');
+        await getCSRFToken();
+      }
+      
+      console.log('Attempting login for:', username);
+      console.log('API Base URL:', getApiUrl());
+      console.log('CSRF Token available:', !!csrfToken);
+      
+      const response = await api.post('/auth/login/', { username, password }, {
+        withCredentials: true, // Ensure cookies are sent
+      });
+      
+      console.log('Login response status:', response.status);
+      console.log('Login response data:', response.data);
+      
+      // Refresh CSRF token after login
       await getCSRFToken();
+      
+      if (response.data && response.data.user) {
+        console.log('Login successful, user data:', response.data.user);
+        return response.data;
+      } else {
+        console.error('Login response missing user data:', response.data);
+        throw new Error('Invalid response from server');
+      }
+    } catch (error: any) {
+      console.error('Login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+        }
+      });
+      
+      // Provide more specific error messages
+      if (error.response) {
+        const errorData = error.response.data;
+        if (errorData?.error) {
+          throw new Error(errorData.error);
+        }
+        if (error.response.status === 401) {
+          throw new Error('Invalid username or password');
+        }
+        if (error.response.status === 403) {
+          throw new Error(errorData?.error || 'Access denied');
+        }
+        if (error.response.status === 400) {
+          throw new Error(errorData?.error || 'Invalid request');
+        }
+        throw new Error(`Server error: ${error.response.status} ${error.response.statusText}`);
+      }
+      
+      if (error.request) {
+        throw new Error('Unable to connect to server. Please check if the backend is running.');
+      }
+      
+      throw error;
     }
-    const response = await api.post('/auth/login/', { username, password }, {
-      withCredentials: true, // Ensure cookies are sent
-    });
-    // Refresh CSRF token after login
-    await getCSRFToken();
-    console.log('Login successful, user data:', response.data);
-    return response.data;
   },
   logout: async () => {
     try {
