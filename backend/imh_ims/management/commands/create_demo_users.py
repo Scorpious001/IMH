@@ -124,7 +124,7 @@ class Command(BaseCommand):
                     try:
                         # Get all view permissions for common modules
                         view_permissions = ModulePermission.objects.filter(
-                            action='VIEW'
+                            action='view'
                         ).filter(
                             module__in=['catalog', 'stock', 'requisitions', 'receiving', 'counts']
                         )
@@ -136,10 +136,10 @@ class Command(BaseCommand):
                                 permission=permission
                             )
                         
-                        # For managers, also add CREATE and UPDATE permissions
+                        # For managers, also add create and edit permissions
                         if role == 'MANAGER':
                             manager_permissions = ModulePermission.objects.filter(
-                                action__in=['CREATE', 'UPDATE']
+                                action__in=['create', 'edit']
                             ).filter(
                                 module__in=['catalog', 'stock', 'requisitions', 'receiving', 'counts']
                             )
