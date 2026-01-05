@@ -6,9 +6,11 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  LineController,
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 import { itemsService } from '../../services/itemsService';
 import { Item } from '../../types/item.types';
@@ -20,6 +22,8 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  LineController,
+  Filler,
   Title,
   Tooltip,
   Legend

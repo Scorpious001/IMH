@@ -7,9 +7,12 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  BarController,
+  LineController,
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 import { reportsService } from '../../services/reportsService';
 import './GeneralUsageChart.css';
@@ -20,6 +23,9 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
+  BarController,
+  LineController,
+  Filler,
   Title,
   Tooltip,
   Legend
