@@ -28,11 +28,15 @@ const TopNav: React.FC = () => {
     { path: '/settings', label: 'Settings', module: null }, // Settings is admin-only, no permission check
   ];
 
-  // Filter menu items based on permissions (admins see all)
+  // Filter menu items based on permissions
   const menuItems = allMenuItems.filter(item => {
     if (item.module === null) {
-      // Settings and Users - admin only
-      return user?.role === 'ADMIN';
+      // Users - admin only, Settings - visible to all
+      if (item.path === '/users') {
+        return user?.role === 'ADMIN';
+      }
+      // Settings is visible to all authenticated users
+      return true;
     }
     // Check view permission for module
     return canViewModule(item.module);

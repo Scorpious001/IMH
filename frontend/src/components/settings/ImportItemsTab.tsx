@@ -217,7 +217,7 @@ const ImportItemsTab: React.FC = () => {
                           onChange={(e) => handleColumnMappingChange(sysCol.key, e.target.value)}
                         >
                           <option value="">-- Auto-detect --</option>
-                          {preview.original_columns.map(col => (
+                          {preview.original_columns?.map(col => (
                             <option key={col} value={col}>
                               {col}
                             </option>
