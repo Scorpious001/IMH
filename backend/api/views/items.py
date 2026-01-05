@@ -46,6 +46,12 @@ class ItemViewSet(viewsets.ModelViewSet):
         else:
             queryset = Item.objects.filter(is_active=True)
         
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        initial_count = queryset.count()
+        logger.info(f'Items queryset initial count: {initial_count}, action: {self.action}, user: {self.request.user.username}')
+        
         # Filters
         category = self.request.query_params.get('category', None)
         below_par = self.request.query_params.get('below_par', None)
@@ -55,32 +61,63 @@ class ItemViewSet(viewsets.ModelViewSet):
         
         if category:
             queryset = queryset.filter(category_id=category)
+            logger.info(f'After category filter: {queryset.count()}')
         
         if vendor:
             queryset = queryset.filter(default_vendor_id=vendor)
+            logger.info(f'After vendor filter: {queryset.count()}')
         
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search) | Q(short_code__icontains=search)
             )
+            logger.info(f'After search filter: {queryset.count()}')
         
         if below_par == 'true':
             # Filter items that are below par at any location
             item_ids = StockLevel.objects.filter(
-                on_hand_qty__lt=F('par')
+                on_hand_qty__lt=F('par'),
+                par__gt=0
             ).values_list('item_id', flat=True).distinct()
             queryset = queryset.filter(id__in=item_ids)
+            logger.info(f'After below_par filter: {queryset.count()}, item_ids count: {len(item_ids)}')
         
         if critical == 'true':
             # Items that are below par and have low stock
             item_ids = StockLevel.objects.filter(
-                on_hand_qty__lt=F('par')
-            ).filter(
-                on_hand_qty__lt=10
+                on_hand_qty__lt=F('par'),
+                on_hand_qty__lt=10,
+                par__gt=0
             ).values_list('item_id', flat=True).distinct()
             queryset = queryset.filter(id__in=item_ids)
+            logger.info(f'After critical filter: {queryset.count()}')
+        
+        final_count = queryset.count()
+        logger.info(f'Items queryset final count: {final_count}')
         
         return queryset.order_by('name')
+    
+    def list(self, request, *args, **kwargs):
+        """Override list to add debugging and ensure proper response"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Set action for get_queryset
+        self.action = 'list'
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        logger.info(f'List queryset count: {queryset.count()}, user: {request.user.username}')
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+            logger.info(f'Paginated response: count={len(serializer.data)}, total={response.data.get("count", 0)}')
+            return response
+        
+        serializer = self.get_serializer(queryset, many=True)
+        logger.info(f'Non-paginated response: count={len(serializer.data)}')
+        return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
     def usage(self, request, pk=None):

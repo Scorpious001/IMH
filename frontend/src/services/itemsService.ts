@@ -25,8 +25,20 @@ export const itemsService = {
         isArray: Array.isArray(response.data),
         dataLength: response.data?.length,
         keys: Object.keys(response.data || {}),
+        count: response.data?.count,
+        next: response.data?.next,
+        previous: response.data?.previous,
         fullResponse: response
       });
+      
+      // Log the actual data structure
+      if (response.data?.results) {
+        console.log('📦 First result item:', response.data.results[0]);
+      } else if (Array.isArray(response.data)) {
+        console.log('📦 First array item:', response.data[0]);
+      } else {
+        console.log('📦 Response data structure:', JSON.stringify(response.data, null, 2).substring(0, 500));
+      }
       
       const data = response.data;
       
