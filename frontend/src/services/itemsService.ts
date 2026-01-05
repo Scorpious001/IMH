@@ -143,9 +143,14 @@ export const itemsService = {
     return response.data;
   },
 
-  bulkImport: async (file: File, preview: boolean = true): Promise<ImportPreviewResponse | ImportResult> => {
+  bulkImport: async (file: File, preview: boolean = true, columnMapping?: Record<string, string>): Promise<ImportPreviewResponse | ImportResult> => {
     const formData = new FormData();
     formData.append('file', file);
+    
+    // Add column mapping if provided
+    if (columnMapping) {
+      formData.append('column_mapping', JSON.stringify(columnMapping));
+    }
     
     // FormData Content-Type will be set automatically by the interceptor
     const response = await api.post(

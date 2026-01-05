@@ -269,9 +269,22 @@ class ItemViewSet(viewsets.ModelViewSet):
         file = request.FILES['file']
         preview_mode = request.query_params.get('preview', 'false').lower() == 'true'
         
+        # Get column mapping from request if provided
+        column_mapping = None
+        if 'column_mapping' in request.data:
+            import json
+            try:
+                column_mapping_str = request.data.get('column_mapping')
+                if isinstance(column_mapping_str, str):
+                    column_mapping = json.loads(column_mapping_str)
+                else:
+                    column_mapping = column_mapping_str
+            except:
+                pass
+        
         try:
             # Parse spreadsheet
-            rows, errors = parse_spreadsheet(file)
+            rows, errors, original_columns = parse_spreadsheet(file, column_mapping)
             if errors:
                 return Response({'error': f'Failed to parse file: {errors}'}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -295,14 +308,16 @@ class ItemViewSet(viewsets.ModelViewSet):
                     })
             
             if preview_mode:
-                # Return preview with validation results
+                # Return preview with validation results and column info
                 return Response({
                     'preview': True,
                     'total_rows': len(rows),
                     'valid_rows': len(validated_rows),
                     'invalid_rows': len(validation_errors),
                     'rows': validated_rows,
-                    'errors': validation_errors
+                    'errors': validation_errors,
+                    'original_columns': original_columns,
+                    'detected_columns': list(rows[0].keys()) if rows else []
                 })
             else:
                 # Process import
@@ -317,10 +332,17 @@ class ItemViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def parse_spreadsheet(file):
-    """Parse CSV or Excel file into list of dictionaries"""
+def parse_spreadsheet(file, column_mapping=None):
+    """Parse CSV or Excel file into list of dictionaries
+    
+    Args:
+        file: Uploaded file object
+        column_mapping: Optional dict mapping user column names to system column names
+                       e.g., {'Product Name': 'name', 'SKU': 'short_code'}
+    """
     errors = []
     rows = []
+    original_columns = []
     
     try:
         # Determine file type
@@ -330,30 +352,78 @@ def parse_spreadsheet(file):
             # Excel file
             df = pd.read_excel(file, engine='openpyxl')
         elif file_extension == 'csv':
-            # CSV file
-            df = pd.read_csv(file)
+            # CSV file - try different encodings
+            try:
+                df = pd.read_csv(file, encoding='utf-8')
+            except UnicodeDecodeError:
+                try:
+                    file.seek(0)  # Reset file pointer
+                    df = pd.read_csv(file, encoding='latin-1')
+                except:
+                    file.seek(0)
+                    df = pd.read_csv(file, encoding='cp1252')
         else:
             errors.append(f'Unsupported file type: {file_extension}. Supported: CSV, XLSX, XLS')
-            return rows, errors
+            return rows, errors, original_columns
+        
+        # Store original column names
+        original_columns = list(df.columns)
+        
+        # Apply column mapping if provided
+        if column_mapping:
+            df = df.rename(columns=column_mapping)
         
         # Convert to list of dictionaries, handling NaN values
         df = df.fillna('')  # Replace NaN with empty string
         rows = df.to_dict('records')
         
-        # Normalize column names (strip whitespace, lowercase)
+        # Normalize column names (strip whitespace, lowercase, handle common variations)
         normalized_rows = []
         for row in rows:
             normalized_row = {}
             for key, value in row.items():
-                normalized_key = str(key).strip().lower().replace(' ', '_')
+                # More flexible normalization for foreign system exports
+                normalized_key = str(key).strip().lower()
+                # Remove common prefixes/suffixes
+                normalized_key = normalized_key.replace(' ', '_').replace('-', '_').replace('.', '_')
+                # Handle common variations
+                column_aliases = {
+                    'item_name': 'name',
+                    'product_name': 'name',
+                    'description': 'name',
+                    'item_code': 'short_code',
+                    'sku': 'short_code',
+                    'product_code': 'short_code',
+                    'item_number': 'short_code',
+                    'part_number': 'short_code',
+                    'qty': 'on_hand_qty',
+                    'quantity': 'on_hand_qty',
+                    'stock': 'on_hand_qty',
+                    'inventory': 'on_hand_qty',
+                    'on_hand': 'on_hand_qty',
+                    'par_level': 'par',
+                    'min_stock': 'par',
+                    'reorder_point': 'par',
+                    'reorder_level': 'par',
+                    'location': 'location_name',
+                    'warehouse': 'location_name',
+                    'store': 'location_name',
+                    'bin': 'location_name',
+                    'supplier': 'default_vendor',
+                    'vendor_name': 'default_vendor',
+                    'manufacturer': 'default_vendor',
+                }
+                # Check aliases
+                if normalized_key in column_aliases:
+                    normalized_key = column_aliases[normalized_key]
                 normalized_row[normalized_key] = value
             normalized_rows.append(normalized_row)
         
-        return normalized_rows, errors
+        return normalized_rows, errors, original_columns
         
     except Exception as e:
         errors.append(f'Failed to parse file: {str(e)}')
-        return rows, errors
+        return rows, errors, original_columns
 
 
 def validate_row(row, row_number):

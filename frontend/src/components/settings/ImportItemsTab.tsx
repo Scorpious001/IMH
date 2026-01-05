@@ -9,7 +9,24 @@ const ImportItemsTab: React.FC = () => {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+  const [showColumnMapping, setShowColumnMapping] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // System column names that can be mapped
+  const systemColumns = [
+    { key: 'name', label: 'Item Name', required: true },
+    { key: 'short_code', label: 'Short Code / SKU', required: true },
+    { key: 'category', label: 'Category', required: false },
+    { key: 'default_vendor', label: 'Vendor / Supplier', required: false },
+    { key: 'cost', label: 'Cost', required: false },
+    { key: 'unit_of_measure', label: 'Unit of Measure', required: false },
+    { key: 'location_name', label: 'Location Name', required: false },
+    { key: 'on_hand_qty', label: 'Quantity on Hand', required: false },
+    { key: 'par', label: 'Par Level', required: false },
+    { key: 'photo_url', label: 'Photo URL', required: false },
+    { key: 'lead_time_days', label: 'Lead Time (Days)', required: false },
+  ];
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -31,13 +48,21 @@ const ImportItemsTab: React.FC = () => {
     await loadPreview(selectedFile);
   };
 
-  const loadPreview = async (fileToPreview: File) => {
+  const loadPreview = async (fileToPreview: File, mapping?: Record<string, string>) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await itemsService.bulkImport(fileToPreview, true);
+      const result = await itemsService.bulkImport(fileToPreview, true, mapping);
       if ('preview' in result && result.preview) {
         setPreview(result);
+        // Show column mapping if columns don't match expected names
+        if (result.original_columns && result.original_columns.length > 0) {
+          const needsMapping = result.original_columns.some(col => {
+            const normalized = col.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            return !['name', 'short_code', 'item_name', 'sku', 'product_name', 'item_code'].includes(normalized);
+          });
+          setShowColumnMapping(needsMapping && result.valid_rows === 0);
+        }
       } else {
         setError('Unexpected response from server');
       }
@@ -65,10 +90,12 @@ const ImportItemsTab: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await itemsService.bulkImport(file, false);
+      const result = await itemsService.bulkImport(file, false, Object.keys(columnMapping).length > 0 ? columnMapping : undefined);
       if ('items_created' in result) {
         setImportResult(result);
         setPreview(null);
+        setColumnMapping({});
+        setShowColumnMapping(false);
       } else {
         setError('Unexpected response from server');
       }
@@ -90,11 +117,34 @@ const ImportItemsTab: React.FC = () => {
     }
   };
 
+  const handleColumnMappingChange = (systemColumn: string, fileColumn: string) => {
+    const newMapping = { ...columnMapping };
+    if (fileColumn) {
+      newMapping[fileColumn] = systemColumn;
+    } else {
+      // Remove mapping
+      Object.keys(newMapping).forEach(key => {
+        if (newMapping[key] === systemColumn) {
+          delete newMapping[key];
+        }
+      });
+    }
+    setColumnMapping(newMapping);
+  };
+
+  const applyColumnMapping = async () => {
+    if (!file) return;
+    await loadPreview(file, columnMapping);
+    setShowColumnMapping(false);
+  };
+
   const handleReset = () => {
     setFile(null);
     setPreview(null);
     setImportResult(null);
     setError(null);
+    setColumnMapping({});
+    setShowColumnMapping(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -137,6 +187,58 @@ const ImportItemsTab: React.FC = () => {
         {loading && (
           <div className="loading-message">
             {preview ? 'Importing items...' : 'Loading preview...'}
+          </div>
+        )}
+
+        {preview && preview.original_columns && preview.original_columns.length > 0 && (
+          <div className="column-mapping-section">
+            <h4>Column Mapping</h4>
+            <p className="section-description">
+              Map your file columns to system columns. The system will try to auto-detect matches, but you can adjust them here.
+            </p>
+            <div className="column-mapping-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>System Column</th>
+                    <th>Your File Column</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {systemColumns.map(sysCol => (
+                    <tr key={sysCol.key}>
+                      <td>
+                        {sysCol.label}
+                        {sysCol.required && <span className="required-asterisk">*</span>}
+                      </td>
+                      <td>
+                        <select
+                          value={Object.keys(columnMapping).find(key => columnMapping[key] === sysCol.key) || ''}
+                          onChange={(e) => handleColumnMappingChange(sysCol.key, e.target.value)}
+                        >
+                          <option value="">-- Auto-detect --</option>
+                          {preview.original_columns.map(col => (
+                            <option key={col} value={col}>
+                              {col}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mapping-actions">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={applyColumnMapping}
+                  disabled={loading}
+                >
+                  Apply Mapping & Reload Preview
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

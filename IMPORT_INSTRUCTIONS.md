@@ -1,7 +1,7 @@
 # Inventory Import Instructions
 
 ## Overview
-The Import Items feature allows administrators to bulk import inventory items from CSV or Excel spreadsheets. The system will automatically create locations if they don't exist.
+The Import Items feature allows administrators to bulk import inventory items from CSV or Excel spreadsheets exported from other inventory systems. The system will automatically create locations if they don't exist and intelligently map column names from various export formats.
 
 ## Access
 - Navigate to **Settings** → **Import Items** (admin-only)
@@ -35,11 +35,32 @@ The Import Items feature allows administrators to bulk import inventory items fr
 - **on_hand_qty** - Quantity on hand as decimal (default: 0)
 - **par** - Par level as decimal - stock should be maintained above this level (default: 0)
 
-## Column Name Flexibility
-Column names are case-insensitive and spaces are automatically converted to underscores. For example:
+## Column Name Flexibility & Auto-Mapping
+The system automatically recognizes common column names from other inventory systems:
+
+### Automatic Column Recognition
+The system will automatically map these common column names:
+- **Item Name**: `item_name`, `product_name`, `description` → `name`
+- **SKU/Code**: `item_code`, `sku`, `product_code`, `item_number`, `part_number` → `short_code`
+- **Quantity**: `qty`, `quantity`, `stock`, `inventory`, `on_hand` → `on_hand_qty`
+- **Par Level**: `par_level`, `min_stock`, `reorder_point`, `reorder_level` → `par`
+- **Location**: `location`, `warehouse`, `store`, `bin` → `location_name`
+- **Vendor**: `supplier`, `vendor_name`, `manufacturer` → `default_vendor`
+
+### Manual Column Mapping
+If your file uses different column names, you can manually map them in the import interface:
+1. Upload your file
+2. The system will show detected columns
+3. Use the column mapping table to map your columns to system columns
+4. Click "Apply Mapping & Reload Preview"
+5. Review the preview and import
+
+### Case & Format Flexibility
+Column names are case-insensitive and spaces/hyphens are automatically converted to underscores. For example:
 - "Name" = "name"
 - "Short Code" = "short_code"
 - "Location Name" = "location_name"
+- "Product-Name" = "product_name"
 
 ## Import Process
 

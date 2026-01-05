@@ -112,6 +112,8 @@ export interface ImportPreviewResponse {
     errors: string[];
     data: Record<string, any>;
   }>;
+  original_columns?: string[];
+  detected_columns?: string[];
 }
 
 export interface ImportResult {
