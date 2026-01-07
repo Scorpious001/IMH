@@ -5,6 +5,7 @@ import UsageTrendsSection from '../../components/report/UsageTrendsSection';
 import GeneralUsageChart from '../../components/report/GeneralUsageChart';
 import LowParUsageChart from '../../components/report/LowParUsageChart';
 import ParLevelStatusChart from '../../components/report/ParLevelStatusChart';
+import EnvironmentalImpactSection from '../../components/report/EnvironmentalImpactSection';
 import ErrorBoundary from '../../components/shared/ErrorBoundary';
 import './ReportsPage.css';
 
@@ -13,6 +14,9 @@ const ReportsPage: React.FC = () => {
     <ErrorBoundary>
       <div className="reports-page">
         <h1>Reports & Alerts</h1>
+        <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Environmental Impact</div>}>
+          <EnvironmentalImpactSection />
+        </ErrorBoundary>
         <ErrorBoundary fallback={<div style={{ padding: '1rem', color: '#dc2626' }}>Error loading Par Level Status</div>}>
           <ParLevelStatusChart />
         </ErrorBoundary>

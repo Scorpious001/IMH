@@ -7,7 +7,7 @@ from api.views import (
     RequisitionApproveView, RequisitionDenyView,
     ReceiveView, ReceivingHistoryView,
     CountSessionViewSet, CountLineView, CountCompleteView, CountApproveView,
-    AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView,
+    AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView, EnvironmentalImpactView,
     CategoriesViewSet, VendorsViewSet, ParLevelsView, CategoryParLevelsView, BulkApplyCategoryParLevelsView,
     LoginView, LogoutView, UserInfoView, CSRFTokenView,
     UserViewSet, PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView,
@@ -61,6 +61,7 @@ urlpatterns = [
     path('reports/usage-trends/', UsageTrendsView.as_view(), name='usage-trends'),
     path('reports/general-usage/', GeneralUsageView.as_view(), name='general-usage'),
     path('reports/low-par-trends/', LowParTrendsView.as_view(), name='low-par-trends'),
+    path('reports/environmental-impact/', EnvironmentalImpactView.as_view(), name='environmental-impact'),
     
     # Settings
     path('settings/par-levels/', ParLevelsView.as_view(), name='par-levels'),

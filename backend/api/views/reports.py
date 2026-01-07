@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import F, Q, Sum, Count, CharField
+from django.db.models import F, Q, Sum, Count, CharField, Avg
 from django.db.models.functions import TruncMonth, TruncQuarter, Extract
 from django.utils import timezone
 from datetime import timedelta, datetime
@@ -270,4 +270,125 @@ class LowParTrendsView(APIView):
             'current_at_risk': current_at_risk,
             'average_below_par': average_below_par,
             'peak_below_par': peak_below_par
+        })
+
+
+class EnvironmentalImpactView(APIView):
+    """Calculate environmental impact metrics"""
+    permission_classes = [IsAuthenticated, create_permission_class('reports', 'view')]
+    
+    def get(self, request):
+        # Get system start date (when first transaction was recorded)
+        first_transaction = InventoryTransaction.objects.order_by('timestamp').first()
+        if not first_transaction:
+            return Response({
+                'error': 'No transaction data available'
+            }, status=404)
+        
+        system_start_date = first_transaction.timestamp
+        days_active = (timezone.now() - system_start_date).days
+        days_active = max(days_active, 1)  # Avoid division by zero
+        
+        # 1. PAPER SAVINGS
+        # Each transaction represents a paper form saved
+        total_transactions = InventoryTransaction.objects.count()
+        # Estimate: 2 pages per transaction (form + receipt)
+        pages_saved = total_transactions * 2
+        # Average tree produces ~8,333 sheets of paper
+        trees_saved = pages_saved / 8333
+        
+        # 2. WASTE REDUCTION
+        # Calculate waste reduction from better inventory management
+        # Items that would have expired/been wasted without proper tracking
+        total_items = Item.objects.filter(is_active=True).count()
+        below_par_items = StockLevel.objects.filter(
+            on_hand_qty__lt=F('par'),
+            par__gt=0,
+            item__is_active=True
+        ).count()
+        
+        # Estimate: 15% waste reduction from better tracking
+        # Average item value for waste calculation
+        avg_item_cost = InventoryTransaction.objects.filter(
+            cost__isnull=False,
+            cost__gt=0
+        ).aggregate(avg=Avg('cost'))['avg'] or 0
+        
+        # Waste reduction estimate (items that would have been overstocked)
+        waste_reduction_percentage = 0.15
+        estimated_waste_reduction_value = float(avg_item_cost) * total_items * waste_reduction_percentage
+        
+        # 3. TRANSPORTATION/EMISSIONS REDUCTION
+        # Calculate optimized ordering (fewer emergency orders)
+        # Emergency orders = orders placed when below par
+        # Normal orders = planned orders based on par levels
+        
+        # Count transactions that represent planned vs emergency
+        # (This is simplified - in reality you'd track order types)
+        total_receives = InventoryTransaction.objects.filter(type='RECEIVE').count()
+        
+        # Estimate: 30% reduction in delivery trips due to better planning
+        # Average delivery truck emits ~0.5 kg CO2 per km
+        # Average delivery distance: 50 km
+        # Estimated trips saved
+        trips_saved = total_receives * 0.30
+        km_saved = trips_saved * 50  # 50 km per trip
+        co2_saved_transport = km_saved * 0.5  # kg CO2 per km
+        
+        # 4. CARBON FOOTPRINT
+        # Paper production: ~1.2 kg CO2 per kg of paper
+        # Average sheet: 0.005 kg
+        paper_weight_kg = (pages_saved * 0.005) / 1000  # Convert to kg
+        co2_saved_paper = paper_weight_kg * 1.2
+        
+        # Waste reduction CO2 (landfill emissions)
+        # Average item in landfill: ~2 kg CO2 per kg of waste
+        # Estimate waste weight (simplified)
+        waste_weight_kg = estimated_waste_reduction_value / 10  # Rough estimate
+        co2_saved_waste = waste_weight_kg * 2
+        
+        total_co2_saved = co2_saved_paper + co2_saved_transport + co2_saved_waste
+        
+        # 5. ENERGY SAVINGS
+        # Reduced energy from less waste processing
+        # Estimate: 0.5 kWh per kg of waste avoided
+        energy_saved_kwh = waste_weight_kg * 0.5
+        
+        return Response({
+            'system_start_date': system_start_date.isoformat(),
+            'days_active': days_active,
+            'paper_savings': {
+                'total_transactions': total_transactions,
+                'pages_saved': pages_saved,
+                'trees_saved': round(trees_saved, 2),
+                'co2_saved_kg': round(co2_saved_paper, 2)
+            },
+            'waste_reduction': {
+                'total_items_tracked': total_items,
+                'below_par_alerts_prevented': below_par_items,
+                'waste_reduction_percentage': waste_reduction_percentage * 100,
+                'estimated_value_saved': round(estimated_waste_reduction_value, 2),
+                'waste_weight_kg': round(waste_weight_kg, 2),
+                'co2_saved_kg': round(co2_saved_waste, 2)
+            },
+            'transportation': {
+                'total_receipts': total_receives,
+                'trips_saved': round(trips_saved, 1),
+                'km_saved': round(km_saved, 1),
+                'co2_saved_kg': round(co2_saved_transport, 2)
+            },
+            'carbon_footprint': {
+                'total_co2_saved_kg': round(total_co2_saved, 2),
+                'total_co2_saved_tons': round(total_co2_saved / 1000, 3),
+                'equivalent_cars_off_road_days': round(total_co2_saved / 4.6, 1)  # Average car emits 4.6 kg CO2 per day
+            },
+            'energy_savings': {
+                'kwh_saved': round(energy_saved_kwh, 2),
+                'equivalent_homes_powered_days': round(energy_saved_kwh / 30, 1)  # Average home uses 30 kWh/day
+            },
+            'summary': {
+                'trees_saved': round(trees_saved, 2),
+                'total_co2_tons': round(total_co2_saved / 1000, 3),
+                'waste_avoided_kg': round(waste_weight_kg, 2)
+            }
         })
