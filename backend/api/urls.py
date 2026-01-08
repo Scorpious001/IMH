@@ -8,9 +8,12 @@ from api.views import (
     ReceiveView, ReceivingHistoryView,
     CountSessionViewSet, CountLineView, CountCompleteView, CountApproveView,
     AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView, EnvironmentalImpactView,
+    DashboardStatsView,
     CategoriesViewSet, VendorsViewSet, ParLevelsView, CategoryParLevelsView, BulkApplyCategoryParLevelsView,
     LoginView, LogoutView, UserInfoView, CSRFTokenView,
     UserViewSet, PurchaseRequestViewSet, PurchaseRequestApproveView, PurchaseRequestDenyView,
+    DepartmentViewSet, PhysicalChangeRequestViewSet, RequestedItemViewSet,
+    SynergyEnigmaSyncView, SynergyEnigmaPushView,
     AppDownloadView, AppVersionView
 )
 
@@ -23,7 +26,10 @@ router.register(r'counts/sessions', CountSessionViewSet, basename='countsession'
 router.register(r'settings/categories', CategoriesViewSet, basename='category')
 router.register(r'settings/vendors', VendorsViewSet, basename='vendor')
 router.register(r'settings/users', UserViewSet, basename='user')
+router.register(r'settings/departments', DepartmentViewSet, basename='department')
 router.register(r'purchase-requests', PurchaseRequestViewSet, basename='purchaserequest')
+router.register(r'physical-change-requests', PhysicalChangeRequestViewSet, basename='physicalchangerequest')
+router.register(r'requested-items', RequestedItemViewSet, basename='requesteditem')
 
 urlpatterns = [
     # Stock operations - must come before router to avoid conflicts
@@ -63,6 +69,9 @@ urlpatterns = [
     path('reports/low-par-trends/', LowParTrendsView.as_view(), name='low-par-trends'),
     path('reports/environmental-impact/', EnvironmentalImpactView.as_view(), name='environmental-impact'),
     
+    # Dashboard
+    path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
+    
     # Settings
     path('settings/par-levels/', ParLevelsView.as_view(), name='par-levels'),
     path('settings/categories/<int:category_id>/par-levels/', CategoryParLevelsView.as_view(), name='category-par-levels'),
@@ -75,5 +84,9 @@ urlpatterns = [
     # App Download
     path('app/download/', AppDownloadView.as_view(), name='app-download'),
     path('app/version/', AppVersionView.as_view(), name='app-version'),
+    
+    # Synergy/Enigma Integration
+    path('integrations/synergy-enigma/sync/', SynergyEnigmaSyncView.as_view(), name='synergy-enigma-sync'),
+    path('integrations/synergy-enigma/push/', SynergyEnigmaPushView.as_view(), name='synergy-enigma-push'),
 ]
 

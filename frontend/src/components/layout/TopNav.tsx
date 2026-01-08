@@ -17,6 +17,7 @@ const TopNav: React.FC = () => {
   };
 
   const allMenuItems = [
+    { path: '/dashboard', label: 'Dashboard', module: 'reports' },
     { path: '/catalog', label: 'Catalog', module: 'catalog' },
     { path: '/stock-by-location', label: 'Stock by Location', module: 'stock' },
     { path: '/vendors', label: 'Vendors', module: 'vendors' },

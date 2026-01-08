@@ -18,6 +18,11 @@ export interface User {
   profile?: {
     id: number;
     role: 'SUPERVISOR' | 'MANAGER' | 'ADMIN';
+    department?: {
+      id: number;
+      name: string;
+      code?: string;
+    };
   };
 }
 

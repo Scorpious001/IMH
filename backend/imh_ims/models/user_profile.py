@@ -20,6 +20,14 @@ class UserProfile(models.Model):
         choices=ROLE_CHOICES,
         default='SUPERVISOR'
     )
+    department = models.ForeignKey(
+        'Department',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='members',
+        help_text="User's department assignment"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

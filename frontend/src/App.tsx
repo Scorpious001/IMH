@@ -13,6 +13,7 @@ import RequisitionsPage from './pages/Requisitions/RequisitionsPage';
 import ReceivingPage from './pages/Receiving/ReceivingPage';
 import CountsPage from './pages/Counts/CountsPage';
 import ReportsPage from './pages/Reports/ReportsPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import UsersPage from './pages/Users/UsersPage';
 import DownloadPage from './pages/Download/DownloadPage';
@@ -33,7 +34,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/"
         element={
-          <Navigate to={isAuthenticated ? '/catalog' : '/login'} replace />
+          <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
         }
       />
       <Route
@@ -112,6 +113,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <MobileLayout>
               <ReportsPage />
+            </MobileLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <MobileLayout>
+              <DashboardPage />
             </MobileLayout>
           </ProtectedRoute>
         }

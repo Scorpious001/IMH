@@ -2,7 +2,9 @@ from django.contrib import admin
 from .models import (
     Category, Vendor, Location, Item, StockLevel,
     InventoryTransaction, Requisition, RequisitionLine,
-    CountSession, CountLine, PurchaseRequest, PurchaseRequestLine
+    CountSession, CountLine, PurchaseRequest, PurchaseRequestLine,
+    Department, PhysicalChangeRequest, PhysicalChangeRequestLine,
+    RequestedItem, UserProfile
 )
 
 
@@ -76,3 +78,36 @@ class CountLineInline(admin.TabularInline):
 class PurchaseRequestAdmin(admin.ModelAdmin):
     list_display = ['id', 'vendor', 'status', 'requested_by', 'created_at']
     list_filter = ['status', 'created_at']
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['name', 'code']
+
+
+class PhysicalChangeRequestLineInline(admin.TabularInline):
+    model = PhysicalChangeRequestLine
+    extra = 1
+
+
+@admin.register(PhysicalChangeRequest)
+class PhysicalChangeRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'request_type', 'location', 'status', 'requested_by', 'total_cost', 'requires_approval', 'created_at']
+    list_filter = ['status', 'request_type', 'requires_approval', 'created_at']
+    inlines = [PhysicalChangeRequestLineInline]
+
+
+@admin.register(RequestedItem)
+class RequestedItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'item', 'status', 'requested_qty', 'priority', 'requested_at']
+    list_filter = ['status', 'priority', 'requested_at']
+    search_fields = ['user__username', 'item__name']
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'role', 'department', 'created_at']
+    list_filter = ['role', 'department']
+    search_fields = ['user__username', 'user__email']

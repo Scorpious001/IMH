@@ -4,7 +4,12 @@ from .stock import StockViewSet, StockTransferView, StockIssueView, StockAdjustV
 from .requisitions import RequisitionViewSet, RequisitionPickView, RequisitionCompleteView, RequisitionApproveView, RequisitionDenyView
 from .receiving import ReceiveView, ReceivingHistoryView
 from .counts import CountSessionViewSet, CountLineView, CountCompleteView, CountApproveView
-from .reports import AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView
+from .reports import AlertsView, SuggestedOrdersView, UsageTrendsView, GeneralUsageView, LowParTrendsView, EnvironmentalImpactView
+from .dashboard import DashboardStatsView
+from .departments import DepartmentViewSet
+from .physical_change_requests import PhysicalChangeRequestViewSet
+from .requested_items import RequestedItemViewSet
+from .integrations import SynergyEnigmaSyncView, SynergyEnigmaPushView
 from .settings import CategoriesViewSet, VendorsViewSet, ParLevelsView, CategoryParLevelsView, BulkApplyCategoryParLevelsView
 from .auth import LoginView, LogoutView, UserInfoView, CSRFTokenView
 from .users import UserViewSet
@@ -34,6 +39,8 @@ __all__ = [
     'UsageTrendsView',
     'GeneralUsageView',
     'LowParTrendsView',
+    'EnvironmentalImpactView',
+    'DashboardStatsView',
     'CategoriesViewSet',
     'VendorsViewSet',
     'ParLevelsView',
@@ -47,6 +54,11 @@ __all__ = [
     'PurchaseRequestViewSet',
     'PurchaseRequestApproveView',
     'PurchaseRequestDenyView',
+    'DepartmentViewSet',
+    'PhysicalChangeRequestViewSet',
+    'RequestedItemViewSet',
+    'SynergyEnigmaSyncView',
+    'SynergyEnigmaPushView',
     'AppDownloadView',
     'AppVersionView',
 ]

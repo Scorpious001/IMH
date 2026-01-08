@@ -4,7 +4,9 @@ from imh_ims.models import (
     Category, Vendor, Location, Item, StockLevel,
     InventoryTransaction, Requisition, RequisitionLine,
     CountSession, CountLine, PurchaseRequest, PurchaseRequestLine,
-    UserProfile, ModulePermission, UserPermission
+    UserProfile, ModulePermission, UserPermission,
+    Department, PhysicalChangeRequest, PhysicalChangeRequestLine,
+    RequestedItem
 )
 
 
@@ -254,10 +256,25 @@ class PurchaseRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'submitted_at', 'approved_at', 'denied_at']
 
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    member_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Department
+        fields = ['id', 'name', 'code', 'description', 'is_active', 'member_count', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'member_count']
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    department = DepartmentSerializer(read_only=True)
+    department_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = UserProfile
-        fields = ['id', 'role', 'created_at', 'updated_at']
+        fields = ['id', 'role', 'department', 'department_id', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 
@@ -311,4 +328,53 @@ class UserSerializer(serializers.ModelSerializer):
         except Exception:
             # If permissions table doesn't exist yet or other error, return empty list
             return []
+
+
+class PhysicalChangeRequestLineSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    item_short_code = serializers.CharField(source='item.short_code', read_only=True)
+    line_cost = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = PhysicalChangeRequestLine
+        fields = ['id', 'item', 'item_name', 'item_short_code', 'qty', 'unit_cost', 'line_cost', 'notes']
+
+
+class PhysicalChangeRequestSerializer(serializers.ModelSerializer):
+    location_name = serializers.CharField(source='location.name', read_only=True)
+    requested_by_name = serializers.CharField(source='requested_by.username', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.username', read_only=True, allow_null=True)
+    denied_by_name = serializers.CharField(source='denied_by.username', read_only=True, allow_null=True)
+    printed_by_name = serializers.CharField(source='printed_by.username', read_only=True, allow_null=True)
+    lines = PhysicalChangeRequestLineSerializer(many=True, read_only=True)
+    needs_approval = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = PhysicalChangeRequest
+        fields = [
+            'id', 'request_type', 'location', 'location_name', 'requested_by', 'requested_by_name',
+            'status', 'created_at', 'completed_at', 'notes', 'requires_approval', 'needs_approval',
+            'approved_by', 'approved_by_name', 'approved_at', 'denied_by', 'denied_by_name',
+            'denied_at', 'denial_reason', 'total_cost', 'cost_threshold', 'printed_at',
+            'printed_by', 'printed_by_name', 'lines'
+        ]
+        read_only_fields = ['created_at', 'completed_at', 'approved_at', 'denied_at', 'printed_at']
+
+
+class RequestedItemSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    item_short_code = serializers.CharField(source='item.short_code', read_only=True)
+    item_cost = serializers.DecimalField(source='item.cost', max_digits=10, decimal_places=2, read_only=True, allow_null=True)
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True, allow_null=True)
+    cancelled_by_name = serializers.CharField(source='cancelled_by.username', read_only=True, allow_null=True)
+
+    class Meta:
+        model = RequestedItem
+        fields = [
+            'id', 'user', 'user_name', 'item', 'item_name', 'item_short_code', 'item_cost',
+            'department', 'department_name', 'status', 'requested_at', 'requested_qty',
+            'notes', 'priority', 'ordered_at', 'received_at', 'cancelled_at', 'cancelled_by', 'cancelled_by_name'
+        ]
+        read_only_fields = ['requested_at', 'ordered_at', 'received_at', 'cancelled_at']
 
